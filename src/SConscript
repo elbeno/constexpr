@@ -1,0 +1,3 @@
+Import('env')
+
+env.SConscript('test/SConscript')
