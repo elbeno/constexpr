@@ -354,7 +354,7 @@ namespace cex
   //----------------------------------------------------------------------------
   // natural logarithm using
   // https://en.wikipedia.org/wiki/Natural_logarithm#High_precision
-  // domain error occurs if x < 0
+  // domain error occurs if x <= 0
   namespace detail
   {
     template <typename T>
@@ -423,6 +423,8 @@ constexpr bool feq(T x, T y)
 
 int main(int, char* [])
 {
+  // All constants referenced from Wolfram Alpha :)
+
   //----------------------------------------------------------------------------
   // abs
   static_assert(feq(1.0f, cex::abs(-1.0f)), "abs(-1.0f)");
