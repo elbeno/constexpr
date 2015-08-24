@@ -384,6 +384,33 @@ namespace cex
     return x > 0 ? detail::log(x, 0.0l) :
       throw std::domain_error(log_domain_error);
   }
+
+  //----------------------------------------------------------------------------
+  // other logarithms
+  constexpr float log10(float x)
+  {
+    return log(x)/log(10.0f);
+  }
+  constexpr double log10(double x)
+  {
+    return log(x)/log(10.0);
+  }
+  constexpr long double log10(long double x)
+  {
+    return log(x)/log(10.0l);
+  }
+  constexpr float log2(float x)
+  {
+    return log(x)/log(2.0f);
+  }
+  constexpr double log2(double x)
+  {
+    return log(x)/log(2.0);
+  }
+  constexpr long double log2(long double x)
+  {
+    return log(x)/log(2.0l);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -522,9 +549,34 @@ int main(int, char* [])
   static_assert(feq(0.0f, cex::log(1.0f)), "log(1.0f)");
   static_assert(feq(0.0, cex::log(1.0)), "log(1.0)");
   static_assert(feq(0.0l, cex::log(1.0l)), "log(1.0l)");
+  static_assert(feq(1.0f, cex::log(cex::exp(1.0f))), "log(ef)");
+  static_assert(feq(1.0, cex::log(cex::exp(1.0))), "log(e)");
+  static_assert(feq(1.0l, cex::log(cex::exp(1.0l))), "log(el)");
 
   // ln(2) = 0.693147180559945309417
   static_assert(feq(0.6931472f, cex::log(2.0f)), "log(2.0f)");
   static_assert(feq(0.6931471805599454, cex::log(2.0)), "log(2.0)");
   static_assert(feq(0.6931471805599453094l, cex::log(2.0l)), "log(2.0l)");
+
+  //----------------------------------------------------------------------------
+  // log10
+  static_assert(feq(1.0f, cex::log10(10.0f)), "log10(10.0f)");
+  static_assert(feq(1.0, cex::log10(10.0)), "log10(10.0)");
+  static_assert(feq(1.0l, cex::log10(10.0l)), "log10(10.0l)");
+
+  // log10(2) = 0.301029995663981195213
+  static_assert(feq(0.301029996f, cex::log10(2.0f)), "log10(2.0f)");
+  static_assert(feq(0.3010299956639812, cex::log10(2.0)), "log10(2.0)");
+  static_assert(feq(0.3010299956639811952l, cex::log10(2.0l)), "log10(2.0l)");
+
+  //----------------------------------------------------------------------------
+  // log2
+  static_assert(feq(1.0f, cex::log2(2.0f)), "log2(2.0f)");
+  static_assert(feq(1.0, cex::log2(2.0)), "log2(2.0)");
+  static_assert(feq(1.0l, cex::log2(2.0l)), "log2(2.0l)");
+
+  // log2(10) = 3.321928094887362347870
+  static_assert(feq(3.321928f, cex::log2(10.0f)), "log2(10.0f)");
+  static_assert(feq(3.3219280948873606, cex::log2(10.0)), "log2(10.0)");
+  static_assert(feq(3.3219280948873623479l, cex::log2(10.0l)), "log2(10.0l)");
 }
