@@ -350,6 +350,40 @@ namespace cex
       throw std::domain_error(mod_domain_error);
   }
   #endif
+
+  //----------------------------------------------------------------------------
+  // natural logarithm using
+  // https://en.wikipedia.org/wiki/Natural_logarithm#High_precision
+  // domain error occurs if x < 0
+  namespace detail
+  {
+    template <typename T>
+    constexpr T log_iter(T x, T y)
+    {
+      return y + T{2} * (x - cex::exp(y)) / (x + cex::exp(y));
+    }
+    template <typename T>
+    constexpr T log(T x, T y)
+    {
+      return y == log_iter(x, y) ? y : log(x, log_iter(x, y));
+    }
+  }
+  const char* log_domain_error;
+  constexpr float log(float x)
+  {
+    return x > 0 ? detail::log(x, 0.0f) :
+      throw std::domain_error(log_domain_error);
+  }
+  constexpr double log(double x)
+  {
+    return x > 0 ? detail::log(x, 0.0) :
+      throw std::domain_error(log_domain_error);
+  }
+  constexpr long double log(long double x)
+  {
+    return x > 0 ? detail::log(x, 0.0l) :
+      throw std::domain_error(log_domain_error);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -482,4 +516,15 @@ int main(int, char* [])
   #if __cplusplus == 201402L
   static_assert(feq(1.0l, cex::fmod(9.0l, 4.0l)), "fmod(9.0l, 4.0l)");
   #endif
+
+  //----------------------------------------------------------------------------
+  // log
+  static_assert(feq(0.0f, cex::log(1.0f)), "log(1.0f)");
+  static_assert(feq(0.0, cex::log(1.0)), "log(1.0)");
+  static_assert(feq(0.0l, cex::log(1.0l)), "log(1.0l)");
+
+  // ln(2) = 0.693147180559945309417
+  static_assert(feq(0.6931472f, cex::log(2.0f)), "log(2.0f)");
+  static_assert(feq(0.6931471805599454, cex::log(2.0)), "log(2.0)");
+  static_assert(feq(0.6931471805599453094l, cex::log(2.0l)), "log(2.0l)");
 }
