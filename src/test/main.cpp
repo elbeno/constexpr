@@ -40,12 +40,27 @@ namespace cex
   }
 
   //----------------------------------------------------------------------------
+  // raise to integer power
+  constexpr float ipow(float x, int n)
+  {
+    return (n == 0) ? 1.0f :
+      n == 1 ? x :
+      n > 1 ? ((n & 1) ? x * ipow(x, n-1) : ipow(x, n/2) * ipow(x, n/2)) :
+      1.0f / ipow(x, -n);
+  }
   constexpr double ipow(double x, int n)
   {
     return (n == 0) ? 1.0 :
       n == 1 ? x :
       n > 1 ? ((n & 1) ? x * ipow(x, n-1) : ipow(x, n/2) * ipow(x, n/2)) :
       1.0 / ipow(x, -n);
+  }
+  constexpr long double ipow(long double x, int n)
+  {
+    return (n == 0) ? 1.0l :
+      n == 1 ? x :
+      n > 1 ? ((n & 1) ? x * ipow(x, n-1) : ipow(x, n/2) * ipow(x, n/2)) :
+      1.0l / ipow(x, -n);
   }
 
   //----------------------------------------------------------------------------
@@ -55,9 +70,8 @@ namespace cex
     template <typename T>
     constexpr T sqrt(T x, T guess)
     {
-      return (guess + x/guess)/2 == guess ?
-        guess :
-        sqrt(x, (guess + x/guess)/2);
+      return (guess + x/guess)/T{2} == guess ? guess :
+        sqrt(x, (guess + x/guess)/T{2});
     }
   }
   constexpr float sqrt(float x)
@@ -80,9 +94,8 @@ namespace cex
     template <typename T>
     constexpr T cbrt(T x, T guess)
     {
-      return (2*guess + x/(guess*guess))/3 == guess ?
-        guess :
-        cbrt(x, (2*guess + x/(guess*guess))/3);
+      return (T{2}*guess + x/(guess*guess))/T{3} == guess ? guess :
+        cbrt(x, (T{2}*guess + x/(guess*guess))/T{3});
     }
   }
   constexpr float cbrt(float x)
@@ -125,6 +138,7 @@ namespace cex
 
   //----------------------------------------------------------------------------
   // sin by Taylor series expansion
+  // The body of trig_series is basically the same for sin and cos.
   namespace detail
   {
     template <typename T>
@@ -150,6 +164,8 @@ namespace cex
 
   //----------------------------------------------------------------------------
   // cos by Taylor series expansion
+  // Note that this function uses the same basic form as the sin expansion, so
+  // trig_series with different inputs does the job.
   constexpr float cos(float x)
   {
     return detail::trig_series(x, 1.0f, 2.0f, 3, -1, x*x);
@@ -165,7 +181,8 @@ namespace cex
 
   //----------------------------------------------------------------------------
   // tan(x) = sin(x)/cos(x) - cos(x) cannot be 0
-  // enforce that the domain is correct at compile-time (link-time)
+  // the undefined symbol enforces that this function is evaluated at
+  // compile-time (or it fails at link-time)
   extern const char* tan_domain_error;
   constexpr float tan(float x)
   {
@@ -186,50 +203,132 @@ namespace cex
       throw std::domain_error(tan_domain_error);
   }
 
-  /*
+  //----------------------------------------------------------------------------
   // floor and ceil: each works in terms of the other for negative numbers
+  // The algorithm proceeds by "binary search" on the increment.
+  // But in order not to overflow the max compile-time recursion depth
+  // (say 512) we need to perform an n-ary search, where:
+  // n = 2^(numeric_limits<T>::max_exponent/512 + 1)
+  // (The +1 gives space for other functions in the stack.)
+  // For float, a plain binary search is fine, because max_exponent = 128.
+  // For double, max_exponent = 1024, so we need n = 2^3 = 8.
+  // For long double, max_exponent = 16384, so we need n = 2^33. Oops. Looks
+  // like floor/ceil for long double can only exist for C++14 where we are not
+  // limited to recursion.
+  namespace detail
+  {
+    template <typename T>
+    constexpr T floor2(T x, T guess, T inc)
+    {
+      return guess + inc <= x ? floor2(x, guess + inc, inc) :
+        inc <= T{1} ? guess : floor2(x, guess, inc/T{2});
+    }
+    template <typename T>
+    constexpr T floor(T x, T guess, T inc)
+    {
+      return
+        inc < T{8} ? floor2(x, guess, inc) :
+        guess + inc <= x ? floor(x, guess + inc, inc) :
+        guess + (inc/T{8})*T{7} <= x ? floor(x, guess + (inc/T{8})*T{7}, inc/T{8}) :
+        guess + (inc/T{8})*T{6} <= x ? floor(x, guess + (inc/T{8})*T{6}, inc/T{8}) :
+        guess + (inc/T{8})*T{5} <= x ? floor(x, guess + (inc/T{8})*T{5}, inc/T{8}) :
+        guess + (inc/T{8})*T{4} <= x ? floor(x, guess + (inc/T{8})*T{4}, inc/T{8}) :
+        guess + (inc/T{8})*T{3} <= x ? floor(x, guess + (inc/T{8})*T{3}, inc/T{8}) :
+        guess + (inc/T{8})*T{2} <= x ? floor(x, guess + (inc/T{8})*T{2}, inc/T{8}) :
+        guess + inc/T{8} <= x ? floor(x, guess + inc/T{8}, inc/T{8}) :
+        floor(x, guess, inc/T{8});
+    }
+    template <typename T>
+    constexpr T ceil2(T x, T guess, T dec)
+    {
+      return guess - dec >= x ? ceil2(x, guess - dec, dec) :
+        dec <= T{1} ? guess : ceil2(x, guess, dec/T{2});
+    }
+    template <typename T>
+    constexpr T ceil(T x, T guess, T dec)
+    {
+      return
+        dec < T{8} ? ceil2(x, guess, dec) :
+        guess - dec >= x ? ceil(x, guess - dec, dec) :
+        guess - (dec/T{8})*T{7} >= x ? ceil(x, guess - (dec/T{8})*T{7}, dec/T{8}) :
+        guess - (dec/T{8})*T{6} >= x ? ceil(x, guess - (dec/T{8})*T{6}, dec/T{8}) :
+        guess - (dec/T{8})*T{5} >= x ? ceil(x, guess - (dec/T{8})*T{5}, dec/T{8}) :
+        guess - (dec/T{8})*T{4} >= x ? ceil(x, guess - (dec/T{8})*T{4}, dec/T{8}) :
+        guess - (dec/T{8})*T{3} >= x ? ceil(x, guess - (dec/T{8})*T{3}, dec/T{8}) :
+        guess - (dec/T{8})*T{2} >= x ? ceil(x, guess - (dec/T{8})*T{2}, dec/T{8}) :
+        guess - dec/T{8} >= x ? ceil(x, guess - dec/T{8}, dec/T{8}) :
+        ceil(x, guess, dec/T{8});
+    }
+  }
+
+  constexpr float ceil(float x);
   constexpr double ceil(double x);
 
+  constexpr float floor(float x)
+  {
+    return x < 0 ? -ceil(-x) :
+      detail::floor(
+          x, 0.0f,
+          ipow(2.0f, std::numeric_limits<float>::max_exponent-1));
+  }
   constexpr double floor(double x)
   {
-    if (x < 0.0) return -cex::ceil(-x);
-    double inc = ipow(2.0, std::numeric_limits<double>::max_exponent - 1);
-    double guess = 0.0;
+    return x < 0 ? -ceil(-x) :
+      detail::floor(
+          x, 0.0,
+          ipow(2.0, std::numeric_limits<double>::max_exponent-1));
+  }
+  constexpr float ceil(float x)
+  {
+    return x < 0 ? -floor(-x) :
+      detail::ceil(
+          x, ipow(2.0f, std::numeric_limits<float>::max_exponent-1),
+          ipow(2.0f, std::numeric_limits<float>::max_exponent-1));
+  }
+  constexpr double ceil(double x)
+  {
+    return x < 0 ? -floor(-x) :
+      detail::ceil(
+          x, ipow(2.0, std::numeric_limits<double>::max_exponent-1),
+          ipow(2.0, std::numeric_limits<double>::max_exponent-1));
+  }
+
+  // See above: long double floor/ceil only available for C++14 constexpr
+  #if __cplusplus == 201402L
+  constexpr long double ceil(long double x);
+  constexpr long double floor(long double x)
+  {
+    if (x < 0.0) return -ceil(-x);
+    long double inc = ipow(2.0l, std::numeric_limits<long double>::max_exponent - 1);
+    long double guess = 0.0l;
     for (;;)
     {
       while (guess + inc > x)
       {
-        inc /= 2.0;
-        if (inc < 1.0)
+        inc /= 2.0l;
+        if (inc < 1.0l)
           return guess;
       }
       guess += inc;
     }
   }
-
-  constexpr double ceil(double x)
+  constexpr long double ceil(long double x)
   {
-    if (x < 0.0) return -cex::floor(-x);
-    double dec = ipow(2.0, std::numeric_limits<double>::max_exponent - 1);
-    double guess = dec;
+    if (x < 0.0l) return -floor(-x);
+    long double dec = ipow(2.0l, std::numeric_limits<long double>::max_exponent - 1);
+    long double guess = dec;
     for (;;)
     {
       while (guess - dec < x)
       {
-        dec /= 2.0;
-        if (dec < 1.0)
+        dec /= 2.0l;
+        if (dec < 1.0l)
           return guess;
       }
       guess -= dec;
     }
   }
-
-  // TODO: pow x^y = ipow(x, int_part(y)) * nthroot(x, 1/frac_part(y))
-  constexpr double pow(double x, double y)
-  {
-    return x * y;
-  }
-  */
+  #endif
 }
 
 //------------------------------------------------------------------------------
@@ -255,6 +354,9 @@ int main(int, char* [])
   static_assert(feq(1.0, cex::fabs(1.0)), "fabs(1.0)");
   static_assert(feq(1.0l, cex::fabs(-1.0l)), "fabs(-1.0l)");
   static_assert(feq(1.0l, cex::fabs(1.0l)), "fabs(1.0l)");
+
+  static_assert(feq(9.0f, cex::ipow(3.0f, 2)), "ipow(3.0f, 2)");
+  static_assert(feq(0.111111f, cex::ipow(3.0f, -2)), "ipow(3.0f, -2)");
 
   // square root of 2 = 1.414213562373095048802
   static_assert(feq(1.0f, cex::sqrt(1.0f)), "sqrt(1.0f)");
@@ -315,38 +417,20 @@ int main(int, char* [])
   static_assert(feq(1.0, cex::tan(PI4)), "tan(PI/4)");
   static_assert(feq(1.0l, cex::tan(PI4l)), "tan(PI/4l)");
 
-  /*
+  static_assert(cex::floor(PIf) == 3.0f, "floor(PIf)");
+  static_assert(cex::ceil(PIf) == 4.0f, "ceil(PIf)");
+  static_assert(cex::floor(-PIf) == -4.0f, "floor(-PIf)");
+  static_assert(cex::ceil(-PIf) == -3.0f, "ceil(-PIf)");
 
+  static_assert(cex::floor(PI) == 3.0, "floor(PI)");
+  static_assert(cex::ceil(PI) == 4.0, "ceil(PI)");
+  static_assert(cex::floor(-PI) == -4.0, "floor(-PI)");
+  static_assert(cex::ceil(-PI) == -3.0, "ceil(-PI)");
 
-
-
-  constexpr double cos_pi_4 = cex::cos(PI/4.0);
-  cout << "cos(PI/4) = " << cos_pi_4 << endl;
-
-  constexpr double e = cex::exp(3.0);
-  cout << "e = " << e << endl;
-
-  constexpr double tan_pi_4 = cex::tan(PI/4.0);
-  cout << "tan(PI/4) = " << tan_pi_4 << endl;
-
-  constexpr double one_ninth = cex::ipow(3, -2);
-  cout << "1/9 = " << one_ninth << endl;
-
-  constexpr double two_to_ten = cex::ipow(2, 10);
-  cout << "2^10 = " << two_to_ten << endl;
-
-  constexpr double floor_32 = cex::floor(3.2);
-  cout << "floor(3.2) = " << floor_32 << endl;
-
-  constexpr double ceil_32 = cex::ceil(3.2);
-  cout << "ceil(3.2) = " << ceil_32 << endl;
-
-  constexpr double floor_neg_32 = cex::floor(-3.2);
-  cout << "floor(-3.2) = " << floor_neg_32 << endl;
-
-  constexpr double ceil_neg_32 = cex::ceil(-3.2);
-  cout << "ceil(-3.2) = " << ceil_neg_32 << endl;
-
-  cout << "Hello, world!" << endl;
-  */
+  #if __cplusplus == 201402L
+  static_assert(cex::floor(PIl) == 3.0l, "floor(PIl)");
+  static_assert(cex::ceil(PIl) == 4.0l, "ceil(PIl)");
+  static_assert(cex::floor(-PIl) == -4.0l, "floor(-PIl)");
+  static_assert(cex::ceil(-PIl) == -3.0l, "ceil(-PIl)");
+  #endif
 }
