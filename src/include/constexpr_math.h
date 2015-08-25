@@ -115,7 +115,7 @@ namespace cex
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
     return detail::exp(
-        x, FloatingPoint{1}, FloatingPoint{1}, FloatingPoint{2}, x);
+        x, FloatingPoint{1}, FloatingPoint{1}, 2, x);
   }
   template <typename Integral>
   constexpr double exp(
