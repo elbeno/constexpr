@@ -559,4 +559,57 @@ namespace cex
   {
     return log2(static_cast<double>(x));
   }
+
+  //----------------------------------------------------------------------------
+  // hyperbolic functions
+  template <typename FloatingPoint>
+  constexpr FloatingPoint sinh(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return (exp(x) - exp(-x)) / FloatingPoint{2};
+  }
+  template <typename Integral>
+  constexpr double sinh(
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
+  {
+    return (exp<double>(x) - exp<double>(-x)) / 2.0;
+  }
+
+  template <typename FloatingPoint>
+  constexpr FloatingPoint cosh(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return (exp(x) + exp(-x)) / FloatingPoint{2};
+  }
+  template <typename Integral>
+  constexpr double cosh(
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
+  {
+    return (exp<double>(x) + exp<double>(-x)) / 2.0;
+  }
+
+  extern const char* tanh_domain_error;
+  template <typename FloatingPoint>
+  constexpr FloatingPoint tanh(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return cosh(x) != 0 ?
+      sinh(x) / cosh(x) :
+      throw std::domain_error(tanh_domain_error);
+  }
+  template <typename Integral>
+  constexpr double tanh(
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
+  {
+    return cosh(x) != 0.0 ?
+      sinh(x) / cosh(x) :
+      throw std::domain_error(tanh_domain_error);
+  }
+
 }

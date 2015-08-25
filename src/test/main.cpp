@@ -224,5 +224,21 @@ int main(int, char* [])
   static_assert(feq(3.321928f, cex::log2(10.0f)), "log2(10.0f)");
   static_assert(feq(3.3219280948873606, cex::log2(10.0)), "log2(10.0)");
   static_assert(feq(3.3219280948873623479l, cex::log2(10.0l)), "log2(10.0l)");
-}
 
+  //----------------------------------------------------------------------------
+  // sinh, cosh, tanh
+  static_assert(feq(0.0f, cex::sinh(0.0f)), "sinh(0.0f)");
+  static_assert(feq(0.0, cex::sinh(0.0)), "sinh(0.0)");
+  static_assert(feq(0.0l, cex::sinh(0.0l)), "sinh(0.0l)");
+  static_assert(feq(0.0, cex::sinh(0)), "sinh(0)");
+
+  static_assert(feq(1.0f, cex::cosh(0.0f)), "cosh(0.0f)");
+  static_assert(feq(1.0, cex::cosh(0.0)), "cosh(0.0)");
+  static_assert(feq(1.0l, cex::cosh(0.0l)), "cosh(0.0l)");
+  static_assert(feq(1.0, cex::cosh(0)), "cosh(0)");
+
+  // tanh(pi/4) = 0.655794202632672435653
+  static_assert(feq(0.6557942f, cex::tanh(PI4f)), "tanh(0.0f)");
+  static_assert(feq(0.6557942026326724, cex::tanh(PI4)), "tanh(0.0)");
+  static_assert(feq(0.6557942026326724356l, cex::tanh(PI4l)), "tanh(0.0l)");
+}
