@@ -1,9 +1,5 @@
 #include <constexpr_math.h>
 
-#include <iostream>
-
-using namespace std;
-
 //------------------------------------------------------------------------------
 // constexpr floating-point "equality" (within epsilon)
 template <typename T>
@@ -74,7 +70,7 @@ int main(int, char* [])
   //----------------------------------------------------------------------------
   // sin
   // pi = 3.141592653589793238463
-  constexpr float PIf = 3.141593f;
+  constexpr float PIf = 3.1415927f;
   constexpr double PI = 3.141592653589793;
   constexpr long double PIl = 3.1415926535897932385l;
 
@@ -229,3 +225,4 @@ int main(int, char* [])
   static_assert(feq(3.3219280948873606, cex::log2(10.0)), "log2(10.0)");
   static_assert(feq(3.3219280948873623479l, cex::log2(10.0l)), "log2(10.0l)");
 }
+

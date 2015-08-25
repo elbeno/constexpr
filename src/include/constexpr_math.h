@@ -61,14 +61,14 @@ namespace cex
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return detail::sqrt(x, FloatingPoint{1});
+    return x == 0 ? 0 : detail::sqrt(x, x);
   }
   template <typename Integral>
   constexpr double sqrt(
       Integral x,
       typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
-    return detail::sqrt<double>(x, 1.0);
+    return sqrt<double>(x);
   }
 
   //----------------------------------------------------------------------------
