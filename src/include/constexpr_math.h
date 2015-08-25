@@ -350,7 +350,7 @@ namespace cex
 
   //----------------------------------------------------------------------------
   // mod and fmod: floating-point remainder functions
-  const char* mod_domain_error;
+  extern const char* mod_domain_error;
   constexpr float fmod(float x, float y)
   {
     return y != 0 ? x - floor(x/y)*y :
@@ -423,7 +423,7 @@ namespace cex
       return y == log_iter(x, y) ? y : log(x, log_iter(x, y));
     }
   }
-  const char* log_domain_error;
+  extern const char* log_domain_error;
   template <typename FloatingPoint>
   constexpr FloatingPoint log(
       FloatingPoint x,
