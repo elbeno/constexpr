@@ -1,5 +1,9 @@
 #include <constexpr_math.h>
 
+#include <iostream>
+
+using namespace std;
+
 //------------------------------------------------------------------------------
 // constexpr floating-point "equality" (within epsilon)
 template <typename T>
@@ -119,6 +123,34 @@ int main(int, char* [])
 
   // tan(1) = 1.55740772465490223050697
   static_assert(feq(1.5574077246549022, cex::tan(1)), "tan(1)");
+
+  //----------------------------------------------------------------------------
+  // atan & atan2
+  // arctan(1) = pi/4 = 0.7853981633974483096157
+  // (1 ulp error for long double)
+  static_assert(feq(PI4f, cex::atan(1.0f)), "atan(1.0f)");
+  static_assert(feq(PI4, cex::atan(1.0)), "atan(1.0)");
+  static_assert(feq(0.7853981633974483097l, cex::atan(1.0l)), "atan(1.0l)");
+  static_assert(feq(PI4, cex::atan(1)), "atan(1)");
+
+  // arctan(pi/4) = 0.6657737500283538635905
+  // (1 ulp error for long double)
+  static_assert(feq(0.66577375f, cex::atan(PI4f)), "atan(PI/4f)");
+  static_assert(feq(0.665773750028354, cex::atan(PI4)), "atan(PI/4)");
+  static_assert(feq(0.6657737500283538634l, cex::atan(PI4l)), "atan(PI/4l)");
+
+  // arctan(2) = 1.1071487177940905030171
+  // (1 ulp error for long double)
+  static_assert(feq(1.1071487f, cex::atan(2.0f)), "atan(2.0f)");
+  static_assert(feq(1.10714871779409, cex::atan(2.0)), "atan(2.0)");
+  static_assert(feq(1.1071487177940905026l, cex::atan(2.0l)), "atan(2.0l)");
+
+  // atan(1,1) = pi/4
+  static_assert(feq(PI4, cex::atan2(1.0, 1.0)), "atan2(1.0, 1.0)");
+  static_assert(feq(3.0*PI4, cex::atan2(-1.0, 1.0)), "atan2(-1.0, 1.0)");
+  static_assert(feq(-PI4, cex::atan2(1.0, -1.0)), "atan2(1.0, -1.0)");
+  static_assert(feq(-3.0*PI4, cex::atan2(-1.0, -1.0)), "atan2(-1.0, -1.0)");
+  static_assert(feq(PI4, cex::atan2(1, 1)), "atan2(1, 1)");
 
   //----------------------------------------------------------------------------
   // floor and ceil

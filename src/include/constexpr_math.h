@@ -203,6 +203,95 @@ namespace cex
   }
 
   //----------------------------------------------------------------------------
+  // arctan by Euler's series
+  namespace detail
+  {
+    template <typename T>
+    constexpr T atan_term(T x2, int k)
+    {
+      return (T{2}*static_cast<T>(k)*x2)
+        / ((T{2}*static_cast<T>(k)+T{1}) * (T{1}+x2));
+    }
+    template <typename T>
+    constexpr T atan_product(T x, int k)
+    {
+      return k == 1 ? atan_term(x*x, k) :
+        atan_term(x*x, k) * atan_product(x, k-1);
+    }
+    template <typename T>
+    constexpr T atan_sum(T x, T sum, int n)
+    {
+      return sum + atan_product(x, n) == sum ?
+        sum :
+        atan_sum(x, sum + atan_product(x, n), n+1);
+    }
+  }
+  template <typename FloatingPoint>
+  constexpr FloatingPoint atan(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return x / (FloatingPoint{1} + x*x) *
+      detail::atan_sum(x, FloatingPoint{1}, 1);
+  }
+  template <typename Integral>
+  constexpr double atan(
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
+  {
+    return
+      static_cast<double>(x) / (1.0 + static_cast<double>(x)*static_cast<double>(x)) *
+      detail::atan_sum<double>(x, 1.0, 1);
+  }
+
+  extern const char* atan_domain_error;
+  template <typename FloatingPoint>
+  constexpr FloatingPoint atan2(
+      FloatingPoint x, FloatingPoint y,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    const long double pi = 3.1415926535897932385l;
+    return x > 0 ? atan(y/x) :
+      y >= 0 && x < 0 ? atan(y/x) + static_cast<FloatingPoint>(pi) :
+      y < 0 && x < 0 ? atan(y/x) - static_cast<FloatingPoint>(pi) :
+      y > 0 && x == 0 ? static_cast<FloatingPoint>(pi/2.0l) :
+      y < 0 && x == 0 ? -static_cast<FloatingPoint>(pi/2.0l) :
+      throw std::domain_error(atan_domain_error);
+  }
+
+  // atan2 for general arithmetic types
+  template <typename A1, typename A2>
+  struct atan2_promoted
+  {
+    using type = double;
+  };
+
+  template <typename A>
+  struct atan2_promoted<long double, A>
+  {
+    using type = long double;
+  };
+  template <typename A>
+  struct atan2_promoted<A, long double>
+  {
+    using type = long double;
+  };
+
+  template <typename A1, typename A2>
+  using atan2_promoted_t = typename atan2_promoted<A1, A2>::type;
+
+  template <typename Arithmetic1, typename Arithmetic2>
+  constexpr atan2_promoted_t<Arithmetic1, Arithmetic2> atan2(
+      Arithmetic1 x, Arithmetic2 y,
+      typename std::enable_if<
+        std::is_arithmetic<Arithmetic1>::value
+        && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
+  {
+    using P = atan2_promoted_t<Arithmetic1, Arithmetic2>;
+    return atan2(static_cast<P>(x), static_cast<P>(y));
+  }
+
+  //----------------------------------------------------------------------------
   // floor and ceil: each works in terms of the other for negative numbers
   // The algorithm proceeds by "binary search" on the increment.
   // But in order not to overflow the max compile-time recursion depth
@@ -375,7 +464,6 @@ namespace cex
   {
     using type = double;
   };
-
 
   #if __cplusplus == 201402L
   // Interestingly, this does not seem to produce a template instantiation
