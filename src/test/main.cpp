@@ -149,6 +149,22 @@ int main(int, char* [])
   static_assert(feq(PI4, cex::atan2(1, 1)), "atan2(1, 1)");
 
   //----------------------------------------------------------------------------
+  // asin & acos
+  // asin(1) = pi/2
+  // (1 ulp error for double, more for long double)
+  static_assert(feq(PI2f, cex::asin(1.0f)), "asin(1.0f)");
+  static_assert(feq(1.5707963267948961, cex::asin(1.0)), "asin(1.0)");
+  static_assert(feq(1.5707963267948966196l, cex::asin(1.0l)), "asin(1.0l)");
+  static_assert(feq(1.5707963267948961, cex::asin(1)), "asin(1)");
+
+  // acos(0) = pi/2
+  // (1 ulp error for double, more for long double)
+  static_assert(feq(PI2f, cex::acos(0.0f)), "acos(0.0f)");
+  static_assert(feq(1.5707963267948961, cex::acos(0.0)), "acos(0.0)");
+  static_assert(feq(1.5707963267948966196l, cex::acos(0.0l)), "acos(0.0l)");
+  static_assert(feq(1.5707963267948961, cex::acos(0)), "acos(0)");
+
+  //----------------------------------------------------------------------------
   // floor and ceil
   static_assert(cex::floor(PIf) == 3.0f, "floor(PIf)");
   static_assert(cex::ceil(PIf) == 4.0f, "ceil(PIf)");

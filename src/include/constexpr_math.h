@@ -292,6 +292,46 @@ namespace cex
   }
 
   //----------------------------------------------------------------------------
+  // inverse trig functions
+  extern const char* asin_domain_error;
+  template <typename FloatingPoint>
+  constexpr FloatingPoint asin(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return x >= FloatingPoint{-1} && x <= FloatingPoint{1} ?
+      FloatingPoint{2} * atan(x / (FloatingPoint{1} + sqrt(FloatingPoint{1} - x*x))) :
+      throw std::domain_error(asin_domain_error);
+  }
+  template <typename Integral>
+  constexpr double asin(
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
+  {
+    return asin<double>(x);
+  }
+
+  extern const char* acos_domain_error;
+  template <typename FloatingPoint>
+  constexpr FloatingPoint acos(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    const long double pi = 3.1415926535897932385l;
+    return x == FloatingPoint{-1} ? static_cast<FloatingPoint>(pi) :
+      x >= FloatingPoint{-1} && x <= FloatingPoint{1} ?
+      FloatingPoint{2} * atan(sqrt(FloatingPoint{1} - x*x) / (FloatingPoint{1} + x)) :
+      throw std::domain_error(acos_domain_error);
+  }
+  template <typename Integral>
+  constexpr double acos(
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
+  {
+    return acos<double>(x);
+  }
+
+  //----------------------------------------------------------------------------
   // floor and ceil: each works in terms of the other for negative numbers
   // The algorithm proceeds by "binary search" on the increment.
   // But in order not to overflow the max compile-time recursion depth
