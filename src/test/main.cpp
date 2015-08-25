@@ -1,8 +1,6 @@
-#include <cmath>
-#include <cstdint>
-#include <iostream>
 #include <limits>
 #include <stdexcept>
+#include <type_traits>
 
 using namespace std;
 
@@ -12,62 +10,41 @@ using namespace std;
 namespace cex
 {
   //----------------------------------------------------------------------------
-  constexpr float abs(float x)
-  {
-    return x >= 0 ? x : -x;
-  }
-  constexpr double abs(double x)
-  {
-    return x >= 0 ? x : -x;
-  }
-  constexpr long double abs(long double x)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint abs(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
     return x >= 0 ? x : -x;
   }
 
   //----------------------------------------------------------------------------
-  constexpr float fabs(float x)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint fabs(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
     return x >= 0 ? x : -x;
   }
-  constexpr double fabs(double x)
-  {
-    return x >= 0 ? x : -x;
-  }
-  constexpr long double fabs(long double x)
-  {
-    return x >= 0 ? x : -x;
-  }
-  template <typename Integer>
+  template <typename Integral>
   constexpr double fabs(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type* = nullptr)
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
     return x >= 0 ? x : -x;
   }
 
   //----------------------------------------------------------------------------
   // raise to integer power
-  constexpr float ipow(float x, int n)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint ipow(
+      FloatingPoint x, int n,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return (n == 0) ? 1.0f :
+    return (n == 0) ? FloatingPoint{1} :
       n == 1 ? x :
       n > 1 ? ((n & 1) ? x * ipow(x, n-1) : ipow(x, n/2) * ipow(x, n/2)) :
-      1.0f / ipow(x, -n);
-  }
-  constexpr double ipow(double x, int n)
-  {
-    return (n == 0) ? 1.0 :
-      n == 1 ? x :
-      n > 1 ? ((n & 1) ? x * ipow(x, n-1) : ipow(x, n/2) * ipow(x, n/2)) :
-      1.0 / ipow(x, -n);
-  }
-  constexpr long double ipow(long double x, int n)
-  {
-    return (n == 0) ? 1.0l :
-      n == 1 ? x :
-      n > 1 ? ((n & 1) ? x * ipow(x, n-1) : ipow(x, n/2) * ipow(x, n/2)) :
-      1.0l / ipow(x, -n);
+      FloatingPoint{1} / ipow(x, -n);
   }
 
   //----------------------------------------------------------------------------
@@ -81,22 +58,17 @@ namespace cex
         sqrt(x, (guess + x/guess)/T{2});
     }
   }
-  constexpr float sqrt(float x)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint sqrt(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return detail::sqrt(x, 1.0f);
+    return detail::sqrt(x, FloatingPoint{1});
   }
-  constexpr double sqrt(double x)
-  {
-    return detail::sqrt(x, 1.0);
-  }
-  constexpr long double sqrt(long double x)
-  {
-    return detail::sqrt(x, 1.0l);
-  }
-  template <typename Integer>
+  template <typename Integral>
   constexpr double sqrt(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type* = nullptr)
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
     return detail::sqrt<double>(x, 1.0);
   }
@@ -112,22 +84,17 @@ namespace cex
         cbrt(x, (T{2}*guess + x/(guess*guess))/T{3});
     }
   }
-  constexpr float cbrt(float x)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint cbrt(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return detail::cbrt(x, 1.0f);
+    return detail::cbrt(x, FloatingPoint{1});
   }
-  constexpr double cbrt(double x)
-  {
-    return detail::cbrt(x, 1.0);
-  }
-  constexpr long double cbrt(long double x)
-  {
-    return detail::cbrt(x, 1.0l);
-  }
-  template <typename Integer>
+  template <typename Integral>
   constexpr double cbrt(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type* = nullptr)
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
     return detail::cbrt<double>(x, 1.0);
   }
@@ -144,22 +111,18 @@ namespace cex
         exp(x, sum + t/n, n * i, i+1, t * x);
     }
   }
-  constexpr float exp(float x)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint exp(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return detail::exp(x, 1.0f, 1.0f, 2, x);
+    return detail::exp(
+        x, FloatingPoint{1}, FloatingPoint{1}, FloatingPoint{2}, x);
   }
-  constexpr double exp(double x)
-  {
-    return detail::exp(x, 1.0, 1.0, 2, x);
-  }
-  constexpr long double exp(long double x)
-  {
-    return detail::exp(x, 1.0l, 1.0l, 2, x);
-  }
-  template <typename Integer>
+  template <typename Integral>
   constexpr double exp(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type* = nullptr)
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
     return detail::exp<double>(x, 1.0, 1.0, 2, x);
   }
@@ -177,22 +140,18 @@ namespace cex
         trig_series(x, sum + t*s/n, n*i*(i+1), i+2, -s, t*x*x);
     }
   }
-  constexpr float sin(float x)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint sin(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return detail::trig_series(x, x, 6.0f, 4, -1, x*x*x);
+    return detail::trig_series(
+        x, x, FloatingPoint{6}, 4, -1, x*x*x);
   }
-  constexpr double sin(double x)
-  {
-    return detail::trig_series(x, x, 6.0, 4, -1, x*x*x);
-  }
-  constexpr long double sin(long double x)
-  {
-    return detail::trig_series(x, x, 6.0l, 4, -1, x*x*x);
-  }
-  template <typename Integer>
+  template <typename Integral>
   constexpr double sin(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type* = nullptr)
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
     return detail::trig_series<double>(
         x, x, 6.0, 4, -1,
@@ -203,22 +162,18 @@ namespace cex
   // cos by Taylor series expansion
   // Note that this function uses the same basic form as the sin expansion, so
   // trig_series with different inputs does the job.
-  constexpr float cos(float x)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint cos(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return detail::trig_series(x, 1.0f, 2.0f, 3, -1, x*x);
+    return detail::trig_series(
+        x, FloatingPoint{1}, FloatingPoint{2}, 3, -1, x*x);
   }
-  constexpr double cos(double x)
-  {
-    return detail::trig_series(x, 1.0, 2.0, 3, -1, x*x);
-  }
-  constexpr long double cos(long double x)
-  {
-    return detail::trig_series(x, 1.0l, 2.0l, 3, -1, x*x);
-  }
-  template <typename Integer>
+  template <typename Integral>
   constexpr double cos(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type* = nullptr)
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
     return detail::trig_series<double>(
         x, 1.0, 2.0, 3, -1,
@@ -230,28 +185,19 @@ namespace cex
   // the undefined symbol enforces that this function is evaluated at
   // compile-time (or it fails at link-time)
   extern const char* tan_domain_error;
-  constexpr float tan(float x)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint tan(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return cos(x) != 0.0f ?
+    return cos(x) != 0 ?
       sin(x) / cos(x) :
       throw std::domain_error(tan_domain_error);
   }
-  constexpr double tan(double x)
-  {
-    return cos(x) != 0.0 ?
-      sin(x) / cos(x) :
-      throw std::domain_error(tan_domain_error);
-  }
-  constexpr long double tan(long double x)
-  {
-    return cos(x) != 0.0l ?
-      sin(x) / cos(x) :
-      throw std::domain_error(tan_domain_error);
-  }
-  template <typename Integer>
+  template <typename Integral>
   constexpr double tan(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type* = nullptr)
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
     return cos(x) != 0.0 ?
       sin(x) / cos(x) :
@@ -318,10 +264,10 @@ namespace cex
 
   constexpr float ceil(float x);
   constexpr double ceil(double x);
-  template <typename Integer>
+  template <typename Integral>
   constexpr double ceil(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type* = nullptr);
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr);
 
   constexpr float floor(float x)
   {
@@ -337,10 +283,10 @@ namespace cex
           x, 0.0,
           ipow(2.0, std::numeric_limits<double>::max_exponent-1));
   }
-  template <typename Integer>
+  template <typename Integral>
   constexpr double floor(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type* = nullptr)
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
     return floor(static_cast<double>(x));
   }
@@ -359,10 +305,10 @@ namespace cex
           x, ipow(2.0, std::numeric_limits<double>::max_exponent-1),
           ipow(2.0, std::numeric_limits<double>::max_exponent-1));
   }
-  template <typename Integer>
+  template <typename Integral>
   constexpr double ceil(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type*)
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type*)
   {
     return ceil(static_cast<double>(x));
   }
@@ -480,67 +426,50 @@ namespace cex
     }
   }
   const char* log_domain_error;
-  constexpr float log(float x)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint log(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return x > 0 ? detail::log(x, 0.0f) :
+    return x > 0 ? detail::log(x, FloatingPoint{0}) :
       throw std::domain_error(log_domain_error);
   }
-  constexpr double log(double x)
-  {
-    return x > 0 ? detail::log(x, 0.0) :
-      throw std::domain_error(log_domain_error);
-  }
-  constexpr long double log(long double x)
-  {
-    return x > 0 ? detail::log(x, 0.0l) :
-      throw std::domain_error(log_domain_error);
-  }
-  template <typename Integer>
+  template <typename Integral>
   constexpr double log(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type* = nullptr)
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
     return log(static_cast<double>(x));
   }
 
   //----------------------------------------------------------------------------
   // other logarithms
-  constexpr float log10(float x)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint log10(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return log(x)/log(10.0f);
+    return log(x)/log(FloatingPoint{10});
   }
-  constexpr double log10(double x)
-  {
-    return log(x)/log(10.0);
-  }
-  constexpr long double log10(long double x)
-  {
-    return log(x)/log(10.0l);
-  }
-  template <typename Integer>
+  template <typename Integral>
   constexpr double log10(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type* = nullptr)
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
     return log10(static_cast<double>(x));
   }
 
-  constexpr float log2(float x)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint log2(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return log(x)/log(2.0f);
+    return log(x)/log(FloatingPoint{2});
   }
-  constexpr double log2(double x)
-  {
-    return log(x)/log(2.0);
-  }
-  constexpr long double log2(long double x)
-  {
-    return log(x)/log(2.0l);
-  }
-  template <typename Integer>
+  template <typename Integral>
   constexpr double log2(
-      Integer x,
-      typename std::enable_if<std::is_integral<Integer>::value>::type* = nullptr)
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
     return log2(static_cast<double>(x));
   }
@@ -703,7 +632,6 @@ int main(int, char* [])
   static_assert(feq(1.0l, cex::fmod(9.0l, 4)), "fmod(9.0l, 4)");
   static_assert(feq(1.0l, cex::fmod(9.0l, 4.0l)), "fmod(9.0l, 4.0l)");
   #endif
-
 
   //----------------------------------------------------------------------------
   // log
