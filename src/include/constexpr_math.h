@@ -98,6 +98,48 @@ namespace cex
   }
 
   //----------------------------------------------------------------------------
+  // hypot
+  template <typename FloatingPoint>
+  constexpr FloatingPoint hypot(
+      FloatingPoint x, FloatingPoint y,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return sqrt(x*x + y*y);
+  }
+
+  // hypot for general arithmetic types
+  template <typename A1, typename A2>
+  struct hypot_promoted
+  {
+    using type = double;
+  };
+
+  template <typename A>
+  struct hypot_promoted<long double, A>
+  {
+    using type = long double;
+  };
+  template <typename A>
+  struct hypot_promoted<A, long double>
+  {
+    using type = long double;
+  };
+
+  template <typename A1, typename A2>
+  using hypot_promoted_t = typename hypot_promoted<A1, A2>::type;
+
+  template <typename Arithmetic1, typename Arithmetic2>
+  constexpr hypot_promoted_t<Arithmetic1, Arithmetic2> hypot(
+      Arithmetic1 x, Arithmetic2 y,
+      typename std::enable_if<
+        std::is_arithmetic<Arithmetic1>::value
+        && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
+  {
+    using P = hypot_promoted_t<Arithmetic1, Arithmetic2>;
+    return hypot(static_cast<P>(x), static_cast<P>(y));
+  }
+
+  //----------------------------------------------------------------------------
   // exp by Taylor series expansion
   namespace detail
   {
@@ -415,7 +457,7 @@ namespace cex
       Integral x,
       typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
-    return floor(static_cast<double>(x));
+    return x;
   }
 
   constexpr float ceil(float x)
@@ -437,7 +479,7 @@ namespace cex
       Integral x,
       typename std::enable_if<std::is_integral<Integral>::value>::type*)
   {
-    return ceil(static_cast<double>(x));
+    return x;
   }
 
   // See above: long double floor/ceil only available for C++14 constexpr
@@ -477,24 +519,73 @@ namespace cex
   }
   #endif
 
+  constexpr float trunc(float x)
+  {
+    return x >= 0 ? floor(x) : -floor(-x);
+  }
+  constexpr double trunc(double x)
+  {
+    return x >= 0 ? floor(x) : -floor(-x);
+  }
+  #if __cplusplus == 201402L
+  constexpr long double trunc(long double x)
+  {
+    return x >= 0 ? floor(x) : -floor(-x);
+  }
+  #endif
+
+  template <typename Integral>
+  constexpr double trunc(
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
+  {
+    return x;
+  }
+
+  constexpr float round(float x)
+  {
+    return x >= 0 ? floor(x + 0.5f) :
+      ceil(x - 0.5f);
+  }
+  constexpr double round(double x)
+  {
+    return x >= 0 ? floor(x + 0.5) :
+      ceil(x - 0.5);
+  }
+  #if __cplusplus == 201402L
+  constexpr long double round(long double x)
+  {
+    return x >= 0 ? floor(x + 0.5l) :
+      ceil(x - 0.5l);
+  }
+  #endif
+
+  template <typename Integral>
+  constexpr double round(
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
+  {
+    return x;
+  }
+
   //----------------------------------------------------------------------------
-  // mod and fmod: floating-point remainder functions
-  extern const char* mod_domain_error;
+  // fmod: floating-point remainder function
+  extern const char* fmod_domain_error;
   constexpr float fmod(float x, float y)
   {
-    return y != 0 ? x - floor(x/y)*y :
-      throw std::domain_error(mod_domain_error);
+    return y != 0 ? x - trunc(x/y)*y :
+      throw std::domain_error(fmod_domain_error);
   }
   constexpr double fmod(double x, double y)
   {
-    return y != 0 ? x - floor(x/y)*y :
-      throw std::domain_error(mod_domain_error);
+    return y != 0 ? x - trunc(x/y)*y :
+      throw std::domain_error(fmod_domain_error);
   }
   #if __cplusplus == 201402L
   constexpr long double fmod(long double x, long double y)
   {
-    return y != 0 ? x - floor(x/y)*y :
-      throw std::domain_error(mod_domain_error);
+    return y != 0 ? x - trunc(x/y)*y :
+      throw std::domain_error(fmod_domain_error);
   }
   #endif
 
@@ -532,6 +623,137 @@ namespace cex
   {
     using P = fmod_promoted_t<Arithmetic1, Arithmetic2>;
     return fmod(static_cast<P>(x), static_cast<P>(y));
+  }
+
+  //----------------------------------------------------------------------------
+  // remainder: signed floating-point remainder function
+  extern const char* remainder_domain_error;
+  constexpr float remainder(float x, float y)
+  {
+    return y != 0 ? x - y*round(x/y) :
+      throw std::domain_error(remainder_domain_error);
+  }
+  constexpr double remainder(double x, double y)
+  {
+    return y != 0 ? x - y*round(x/y) :
+      throw std::domain_error(remainder_domain_error);
+  }
+  #if __cplusplus == 201402L
+  constexpr long double remainder(long double x, long double y)
+  {
+    return y != 0 ? x - y*round(x/y) :
+      throw std::domain_error(remainder_domain_error);
+  }
+  #endif
+
+  // remainder for general arithmetic types
+  template <typename A1, typename A2>
+  struct remainder_promoted
+  {
+    using type = double;
+  };
+
+  #if __cplusplus == 201402L
+  template <typename A>
+  struct remainder_promoted<long double, A>
+  {
+    using type = long double;
+  };
+  template <typename A>
+  struct remainder_promoted<A, long double>
+  {
+    using type = long double;
+  };
+  #endif
+
+  template <typename A1, typename A2>
+  using remainder_promoted_t = typename remainder_promoted<A1, A2>::type;
+
+  template <typename Arithmetic1, typename Arithmetic2>
+  constexpr remainder_promoted_t<Arithmetic1, Arithmetic2> remainder(
+      Arithmetic1 x, Arithmetic2 y,
+      typename std::enable_if<
+        std::is_arithmetic<Arithmetic1>::value
+        && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
+  {
+    using P = remainder_promoted_t<Arithmetic1, Arithmetic2>;
+    return remainder(static_cast<P>(x), static_cast<P>(y));
+  }
+
+  //----------------------------------------------------------------------------
+  // fmax/fmin: floating-point min/max function
+  // fdim: positive difference
+  template <typename FloatingPoint>
+  constexpr FloatingPoint fmax(
+      FloatingPoint x, FloatingPoint y,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return x > y ? x : y;
+  }
+  template <typename FloatingPoint>
+  constexpr FloatingPoint fmin(
+      FloatingPoint x, FloatingPoint y,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return x > y ? y : x;
+  }
+  template <typename FloatingPoint>
+  constexpr FloatingPoint fdim(
+      FloatingPoint x, FloatingPoint y,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return x > y ? x-y : 0;
+  }
+
+  // fmax for general arithmetic types
+  template <typename A1, typename A2>
+  struct fmax_promoted
+  {
+    using type = double;
+  };
+  template <typename A>
+  struct fmax_promoted<long double, A>
+  {
+    using type = long double;
+  };
+  template <typename A>
+  struct fmax_promoted<A, long double>
+  {
+    using type = long double;
+  };
+
+  template <typename A1, typename A2>
+  using fmax_promoted_t = typename fmax_promoted<A1, A2>::type;
+
+  template <typename Arithmetic1, typename Arithmetic2>
+  constexpr fmax_promoted_t<Arithmetic1, Arithmetic2> fmax(
+      Arithmetic1 x, Arithmetic2 y,
+      typename std::enable_if<
+        std::is_arithmetic<Arithmetic1>::value
+        && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
+  {
+    using P = fmax_promoted_t<Arithmetic1, Arithmetic2>;
+    return fmax(static_cast<P>(x), static_cast<P>(y));
+  }
+  template <typename Arithmetic1, typename Arithmetic2>
+  constexpr fmax_promoted_t<Arithmetic1, Arithmetic2> fmin(
+      Arithmetic1 x, Arithmetic2 y,
+      typename std::enable_if<
+        std::is_arithmetic<Arithmetic1>::value
+        && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
+  {
+    using P = fmax_promoted_t<Arithmetic1, Arithmetic2>;
+    return fmin(static_cast<P>(x), static_cast<P>(y));
+  }
+  template <typename Arithmetic1, typename Arithmetic2>
+  constexpr fmax_promoted_t<Arithmetic1, Arithmetic2> fdim(
+      Arithmetic1 x, Arithmetic2 y,
+      typename std::enable_if<
+        std::is_arithmetic<Arithmetic1>::value
+        && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
+  {
+    using P = fmax_promoted_t<Arithmetic1, Arithmetic2>;
+    return fdim(static_cast<P>(x), static_cast<P>(y));
   }
 
   //----------------------------------------------------------------------------

@@ -60,6 +60,11 @@ int main(int, char* [])
   static_assert(feq(2.0, cex::cbrt(8)), "cbrt(8)");
 
   //----------------------------------------------------------------------------
+  // hypot
+  static_assert(feq(5.0, cex::hypot(3, 4)), "hypot(3, 4)");
+  static_assert(feq(13.0, cex::hypot(5, 12)), "hypot(5, 12)");
+
+  //----------------------------------------------------------------------------
   // exp
   // e = 2.718281828459045235360
   static_assert(feq(2.718282f, cex::exp(1.0f)), "exp(1.0f)");
@@ -187,6 +192,30 @@ int main(int, char* [])
   static_assert(cex::ceil(1) == 1.0, "ceil(1)");
 
   //----------------------------------------------------------------------------
+  // trunc
+  static_assert(cex::trunc(PIf) == 3.0f, "trunc(PIf)");
+  static_assert(cex::trunc(-PIf) == -3.0f, "trunc(-PIf)");
+  static_assert(cex::trunc(PI) == 3.0, "trunc(PI)");
+  static_assert(cex::trunc(-PI) == -3.0, "trunc(-PI)");
+  #if __cplusplus == 201402L
+  static_assert(cex::trunc(PIl) == 3.0l, "trunc(PIl)");
+  static_assert(cex::trunc(-PIl) == -3.0l, "trunc(-PIl)");
+  #endif
+  static_assert(cex::trunc(1) == 1.0, "trunc(1)");
+
+  //----------------------------------------------------------------------------
+  // round
+  static_assert(cex::round(1.5f) == 2.0f, "round(1.5f)");
+  static_assert(cex::round(-1.5f) == -2.0f, "round(-1.5f)");
+  static_assert(cex::round(1.5) == 2.0, "round(1.5)");
+  static_assert(cex::round(-1.5) == -2.0, "round(-1.5)");
+  #if __cplusplus == 201402L
+  static_assert(cex::round(1.5l) == 2.0l, "round(1.5l)");
+  static_assert(cex::round(-1.5l) == -2.0l, "round(-1.5l)");
+  #endif
+  static_assert(cex::round(1) == 1.0, "round(1)");
+
+  //----------------------------------------------------------------------------
   // fmod
   static_assert(feq(1.0f, cex::fmod(9.0f, 4.0f)), "fmod(9.0f, 4.0f)");
   static_assert(feq(1.0, cex::fmod(9.0, 4.0)), "fmod(9.0, 4.0)");
@@ -201,6 +230,44 @@ int main(int, char* [])
   static_assert(feq(1.0l, cex::fmod(9.0l, 4)), "fmod(9.0l, 4)");
   static_assert(feq(1.0l, cex::fmod(9.0l, 4.0l)), "fmod(9.0l, 4.0l)");
   #endif
+
+  //----------------------------------------------------------------------------
+  // remainder
+  static_assert(feq(1.0f, cex::remainder(9.0f, 4.0f)), "remainder(9.0f, 4.0f)");
+  static_assert(feq(1.0, cex::remainder(9.0, 4.0)), "remainder(9.0, 4.0)");
+  #if __cplusplus == 201402L
+  static_assert(feq(1.0l, cex::remainder(9.0l, 4.0l)), "remainder(9.0l, 4.0l)");
+  #endif
+
+  static_assert(feq(1.0, cex::remainder(9, 4)), "remainder(9, 4)");
+  static_assert(feq(1.0, cex::remainder(9, 4.0)), "remainder(9, 4.0)");
+  #if __cplusplus == 201402L
+  static_assert(feq(1.0l, cex::remainder(9, 4.0l)), "remainder(9, 4.0l)");
+  static_assert(feq(1.0l, cex::remainder(9.0l, 4)), "remainder(9.0l, 4)");
+  static_assert(feq(1.0l, cex::remainder(9.0l, 4.0l)), "remainder(9.0l, 4.0l)");
+  #endif
+
+  static_assert(feq(-1.0, cex::remainder(9, 5)), "remainder(9, 5)");
+  static_assert(feq(1.0, cex::remainder(-9, 5)), "remainder(-9, 5)");
+  static_assert(feq(-1.0, cex::remainder(9, -5)), "remainder(9, -5)");
+  static_assert(feq(1.0, cex::remainder(-9, -5)), "remainder(-9, -5)");
+
+  //----------------------------------------------------------------------------
+  // fmax/fmin/fdim
+  static_assert(feq(1.0f, cex::fmax(0.0f, 1.0f)), "fmax(0.0f, 1.0f)");
+  static_assert(feq(1.0, cex::fmax(0.0, 1.0)), "fmax(0.0, 1.0)");
+  static_assert(feq(1.0l, cex::fmax(0.0l, 1.0l)), "fmax(0.0l, 1.0l)");
+
+  static_assert(feq(0.0f, cex::fmin(0.0f, 1.0f)), "fmin(0.0f, 1.0f)");
+  static_assert(feq(0.0, cex::fmin(0.0, 1.0)), "fmin(0.0, 1.0)");
+  static_assert(feq(0.0l, cex::fmin(0.0l, 1.0l)), "fmin(0.0l, 1.0l)");
+
+  static_assert(feq(1.0f, cex::fdim(2.0f, 1.0f)), "fdim(2.0f, 1.0f)");
+  static_assert(feq(1.0, cex::fdim(2.0, 1.0)), "fdim(2.0, 1.0)");
+  static_assert(feq(1.0l, cex::fdim(2.0l, 1.0l)), "fdim(2.0l, 1.0l)");
+  static_assert(feq(0.0f, cex::fdim(0.0f, 1.0f)), "fdim(0.0f, 1.0f)");
+  static_assert(feq(0.0, cex::fdim(0.0, 1.0)), "fdim(0.0, 1.0)");
+  static_assert(feq(0.0l, cex::fdim(0.0l, 1.0l)), "fdim(0.0l, 1.0l)");
 
   //----------------------------------------------------------------------------
   // log
