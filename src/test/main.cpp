@@ -324,4 +324,13 @@ int main(int, char* [])
   static_assert(feq(0.6557942f, cex::tanh(PI4f)), "tanh(0.0f)");
   static_assert(feq(0.6557942026326724, cex::tanh(PI4)), "tanh(0.0)");
   static_assert(feq(0.6557942026326724356l, cex::tanh(PI4l)), "tanh(0.0l)");
+
+  //----------------------------------------------------------------------------
+  // pow
+  static_assert(feq(1024.0, cex::pow(2, 10)), "pow(2, 10)");
+  static_assert(feq(-0.125, cex::pow(-2, -3)), "pow(-2, -3)");
+  // square root of 2 = 1.414213562373095048802
+  static_assert(feq(1.4142136f, cex::pow(2.0f, 0.5f)), "pow(2.0f, 0.5f)");
+  static_assert(feq(1.4142135623730953, cex::pow(2.0, 0.5)), "pow(2.0, 0.5)");
+  static_assert(feq(1.4142135623730950488l, cex::pow(2.0l, 0.5l)), "pow(2.0l, 0.5l)");
 }

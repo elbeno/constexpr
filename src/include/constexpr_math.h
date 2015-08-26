@@ -705,7 +705,7 @@ namespace cex
     return x > y ? x-y : 0;
   }
 
-  // fmax for general arithmetic types
+  // fmax/fmin/fdim for general arithmetic types
   template <typename A1, typename A2>
   struct fmax_promoted
   {
@@ -874,4 +874,61 @@ namespace cex
       throw std::domain_error(tanh_domain_error);
   }
 
+  //----------------------------------------------------------------------------
+  // pow: compute x^y
+  // a = x^y = (exp(log(x)))^y = exp(log(x)*y)
+  template <typename FloatingPoint>
+  constexpr FloatingPoint pow(
+      FloatingPoint x, FloatingPoint y,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return exp(log(x)*y);
+  }
+  template <typename FloatingPoint>
+  constexpr FloatingPoint pow(
+      FloatingPoint x, int y,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return ipow(x, y);
+  }
+
+  // pow for general arithmetic types
+  template <typename A1, typename A2>
+  struct pow_promoted
+  {
+    using type = double;
+  };
+  template <typename A>
+  struct pow_promoted<long double, A>
+  {
+    using type = long double;
+  };
+  template <typename A>
+  struct pow_promoted<A, long double>
+  {
+    using type = long double;
+  };
+
+  template <typename A1, typename A2>
+  using pow_promoted_t = typename pow_promoted<A1, A2>::type;
+
+  template <typename Arithmetic1, typename Arithmetic2>
+  constexpr pow_promoted_t<Arithmetic1, Arithmetic2> pow(
+      Arithmetic1 x, Arithmetic2 y,
+      typename std::enable_if<
+        std::is_arithmetic<Arithmetic1>::value
+        && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
+  {
+    using P = pow_promoted_t<Arithmetic1, Arithmetic2>;
+    return pow(static_cast<P>(x), static_cast<P>(y));
+  }
+  template <typename Arithmetic1>
+  constexpr pow_promoted_t<Arithmetic1, int> pow(
+      Arithmetic1 x, int y,
+      typename std::enable_if<
+        std::is_arithmetic<Arithmetic1>::value>::type* = nullptr)
+  {
+    using P = pow_promoted_t<Arithmetic1, int>;
+    return ipow(static_cast<P>(x), y);
+  }
 }
