@@ -305,7 +305,7 @@ int main(int, char* [])
 
   // log2(10) = 3.321928094887362347870
   static_assert(feq(3.321928f, cex::log2(10.0f)), "log2(10.0f)");
-  static_assert(feq(3.3219280948873606, cex::log2(10.0)), "log2(10.0)");
+  static_assert(feq(3.321928094887361, cex::log2(10.0)), "log2(10.0)");
   static_assert(feq(3.3219280948873623479l, cex::log2(10.0l)), "log2(10.0l)");
 
   //----------------------------------------------------------------------------
@@ -324,6 +324,27 @@ int main(int, char* [])
   static_assert(feq(0.6557942f, cex::tanh(PI4f)), "tanh(0.0f)");
   static_assert(feq(0.6557942026326724, cex::tanh(PI4)), "tanh(0.0)");
   static_assert(feq(0.6557942026326724356l, cex::tanh(PI4l)), "tanh(0.0l)");
+
+  //----------------------------------------------------------------------------
+  // asinh, acosh, atanh
+
+  // asinh(1) = 0.8813735870195430252326
+  static_assert(feq(0.8813736f, cex::asinh(1.0f)), "asinh(1.0f)");
+  static_assert(feq(0.881373587019543, cex::asinh(1.0)), "asinh(1.0)");
+  static_assert(feq(0.881373587019543025l, cex::asinh(1.0l)), "asinh(1.0l)");
+  static_assert(feq(0.0, cex::asinh(0)), "asinh(0)");
+
+  // acosh(2) = 1.3169578969248167086250
+  static_assert(feq(1.3169579f, cex::acosh(2.0f)), "acosh(2.0f)");
+  static_assert(feq(1.316957896924817, cex::acosh(2.0)), "acosh(2.0)");
+  static_assert(feq(1.3169578969248167086l, cex::acosh(2.0l)), "acosh(2.0l)");
+  static_assert(feq(0.0, cex::acosh(1)), "acosh(1)");
+
+  // atanh(pi/4) = 1.05930617082324315723005
+  static_assert(feq(1.0593062f, cex::atanh(PI4f)), "atanh(pi/4f)");
+  static_assert(feq(1.0593061708232432, cex::atanh(PI4)), "atanh(pi/4)");
+  static_assert(feq(1.0593061708232431572l, cex::atanh(PI4l)), "atanh(pi/4l)");
+  static_assert(feq(0.0, cex::atanh(0)), "atanh(0)");
 
   //----------------------------------------------------------------------------
   // pow

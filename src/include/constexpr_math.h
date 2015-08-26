@@ -702,6 +702,11 @@ namespace cex
   namespace detail
   {
     template <typename T>
+    constexpr bool feq(T x, T y)
+    {
+      return cex::abs(x - y) <= std::numeric_limits<T>::epsilon();
+    }
+    template <typename T>
     constexpr T log_iter(T x, T y)
     {
       return y + T{2} * (x - cex::exp(y)) / (x + cex::exp(y));
@@ -709,7 +714,7 @@ namespace cex
     template <typename T>
     constexpr T log(T x, T y)
     {
-      return y == log_iter(x, y) ? y : log(x, log_iter(x, y));
+      return feq(y, log_iter(x, y)) ? y : log(x, log_iter(x, y));
     }
   }
   extern const char* log_domain_error;
@@ -811,6 +816,60 @@ namespace cex
     return cosh(x) != 0.0 ?
       sinh(x) / cosh(x) :
       throw std::domain_error(tanh_domain_error);
+  }
+
+  //----------------------------------------------------------------------------
+  // inverse hyperbolic functions
+  template <typename FloatingPoint>
+  constexpr FloatingPoint asinh(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return log(x + sqrt(x*x + FloatingPoint{1}));
+  }
+  template <typename Integral>
+  constexpr double asinh(
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
+  {
+    return asinh<double>(x);
+  }
+
+  extern const char* acosh_domain_error;
+  template <typename FloatingPoint>
+  constexpr FloatingPoint acosh(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return x >= 1 ? log(x + sqrt(x*x - FloatingPoint{1})) :
+      throw std::domain_error(acosh_domain_error);
+  }
+  template <typename Integral>
+  constexpr double acosh(
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
+  {
+    return acosh<double>(x);
+  }
+
+  extern const char* atanh_domain_error;
+  template <typename FloatingPoint>
+  constexpr FloatingPoint atanh(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return
+      x > -1 && x < 1 ?
+      (FloatingPoint{1}/FloatingPoint{2})
+        * log((FloatingPoint{1} + x) / (FloatingPoint{1} - x)) :
+      throw std::domain_error(atanh_domain_error);
+  }
+  template <typename Integral>
+  constexpr double atanh(
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
+  {
+    return atanh<double>(x);
   }
 
   //----------------------------------------------------------------------------
