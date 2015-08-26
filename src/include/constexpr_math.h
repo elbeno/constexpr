@@ -109,33 +109,33 @@ namespace cex
 
   // hypot for general arithmetic types
   template <typename A1, typename A2>
-  struct hypot_promoted
+  struct promoted
   {
     using type = double;
   };
 
   template <typename A>
-  struct hypot_promoted<long double, A>
+  struct promoted<long double, A>
   {
     using type = long double;
   };
   template <typename A>
-  struct hypot_promoted<A, long double>
+  struct promoted<A, long double>
   {
     using type = long double;
   };
 
   template <typename A1, typename A2>
-  using hypot_promoted_t = typename hypot_promoted<A1, A2>::type;
+  using promoted_t = typename promoted<A1, A2>::type;
 
   template <typename Arithmetic1, typename Arithmetic2>
-  constexpr hypot_promoted_t<Arithmetic1, Arithmetic2> hypot(
+  constexpr promoted_t<Arithmetic1, Arithmetic2> hypot(
       Arithmetic1 x, Arithmetic2 y,
       typename std::enable_if<
         std::is_arithmetic<Arithmetic1>::value
         && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
   {
-    using P = hypot_promoted_t<Arithmetic1, Arithmetic2>;
+    using P = promoted_t<Arithmetic1, Arithmetic2>;
     return hypot(static_cast<P>(x), static_cast<P>(y));
   }
 
@@ -302,34 +302,14 @@ namespace cex
   }
 
   // atan2 for general arithmetic types
-  template <typename A1, typename A2>
-  struct atan2_promoted
-  {
-    using type = double;
-  };
-
-  template <typename A>
-  struct atan2_promoted<long double, A>
-  {
-    using type = long double;
-  };
-  template <typename A>
-  struct atan2_promoted<A, long double>
-  {
-    using type = long double;
-  };
-
-  template <typename A1, typename A2>
-  using atan2_promoted_t = typename atan2_promoted<A1, A2>::type;
-
   template <typename Arithmetic1, typename Arithmetic2>
-  constexpr atan2_promoted_t<Arithmetic1, Arithmetic2> atan2(
+  constexpr promoted_t<Arithmetic1, Arithmetic2> atan2(
       Arithmetic1 x, Arithmetic2 y,
       typename std::enable_if<
         std::is_arithmetic<Arithmetic1>::value
         && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
   {
-    using P = atan2_promoted_t<Arithmetic1, Arithmetic2>;
+    using P = promoted_t<Arithmetic1, Arithmetic2>;
     return atan2(static_cast<P>(x), static_cast<P>(y));
   }
 
@@ -591,7 +571,7 @@ namespace cex
 
   // fmod for general arithmetic types
   template <typename A1, typename A2>
-  struct fmod_promoted
+  struct cpp14_promoted
   {
     using type = double;
   };
@@ -600,28 +580,28 @@ namespace cex
   // Interestingly, this does not seem to produce a template instantiation
   // ambiguity with fmod_promoted<long double, long double>
   template <typename A>
-  struct fmod_promoted<long double, A>
+  struct cpp14_promoted<long double, A>
   {
     using type = long double;
   };
   template <typename A>
-  struct fmod_promoted<A, long double>
+  struct cpp14_promoted<A, long double>
   {
     using type = long double;
   };
   #endif
 
   template <typename A1, typename A2>
-  using fmod_promoted_t = typename fmod_promoted<A1, A2>::type;
+  using cpp14_promoted_t = typename cpp14_promoted<A1, A2>::type;
 
   template <typename Arithmetic1, typename Arithmetic2>
-  constexpr fmod_promoted_t<Arithmetic1, Arithmetic2> fmod(
+  constexpr cpp14_promoted_t<Arithmetic1, Arithmetic2> fmod(
       Arithmetic1 x, Arithmetic2 y,
       typename std::enable_if<
         std::is_arithmetic<Arithmetic1>::value
         && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
   {
-    using P = fmod_promoted_t<Arithmetic1, Arithmetic2>;
+    using P = cpp14_promoted_t<Arithmetic1, Arithmetic2>;
     return fmod(static_cast<P>(x), static_cast<P>(y));
   }
 
@@ -647,36 +627,14 @@ namespace cex
   #endif
 
   // remainder for general arithmetic types
-  template <typename A1, typename A2>
-  struct remainder_promoted
-  {
-    using type = double;
-  };
-
-  #if __cplusplus == 201402L
-  template <typename A>
-  struct remainder_promoted<long double, A>
-  {
-    using type = long double;
-  };
-  template <typename A>
-  struct remainder_promoted<A, long double>
-  {
-    using type = long double;
-  };
-  #endif
-
-  template <typename A1, typename A2>
-  using remainder_promoted_t = typename remainder_promoted<A1, A2>::type;
-
   template <typename Arithmetic1, typename Arithmetic2>
-  constexpr remainder_promoted_t<Arithmetic1, Arithmetic2> remainder(
+  constexpr cpp14_promoted_t<Arithmetic1, Arithmetic2> remainder(
       Arithmetic1 x, Arithmetic2 y,
       typename std::enable_if<
         std::is_arithmetic<Arithmetic1>::value
         && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
   {
-    using P = remainder_promoted_t<Arithmetic1, Arithmetic2>;
+    using P = cpp14_promoted_t<Arithmetic1, Arithmetic2>;
     return remainder(static_cast<P>(x), static_cast<P>(y));
   }
 
@@ -706,53 +664,34 @@ namespace cex
   }
 
   // fmax/fmin/fdim for general arithmetic types
-  template <typename A1, typename A2>
-  struct fmax_promoted
-  {
-    using type = double;
-  };
-  template <typename A>
-  struct fmax_promoted<long double, A>
-  {
-    using type = long double;
-  };
-  template <typename A>
-  struct fmax_promoted<A, long double>
-  {
-    using type = long double;
-  };
-
-  template <typename A1, typename A2>
-  using fmax_promoted_t = typename fmax_promoted<A1, A2>::type;
-
   template <typename Arithmetic1, typename Arithmetic2>
-  constexpr fmax_promoted_t<Arithmetic1, Arithmetic2> fmax(
+  constexpr promoted_t<Arithmetic1, Arithmetic2> fmax(
       Arithmetic1 x, Arithmetic2 y,
       typename std::enable_if<
         std::is_arithmetic<Arithmetic1>::value
         && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
   {
-    using P = fmax_promoted_t<Arithmetic1, Arithmetic2>;
+    using P = promoted_t<Arithmetic1, Arithmetic2>;
     return fmax(static_cast<P>(x), static_cast<P>(y));
   }
   template <typename Arithmetic1, typename Arithmetic2>
-  constexpr fmax_promoted_t<Arithmetic1, Arithmetic2> fmin(
+  constexpr promoted_t<Arithmetic1, Arithmetic2> fmin(
       Arithmetic1 x, Arithmetic2 y,
       typename std::enable_if<
         std::is_arithmetic<Arithmetic1>::value
         && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
   {
-    using P = fmax_promoted_t<Arithmetic1, Arithmetic2>;
+    using P = promoted_t<Arithmetic1, Arithmetic2>;
     return fmin(static_cast<P>(x), static_cast<P>(y));
   }
   template <typename Arithmetic1, typename Arithmetic2>
-  constexpr fmax_promoted_t<Arithmetic1, Arithmetic2> fdim(
+  constexpr promoted_t<Arithmetic1, Arithmetic2> fdim(
       Arithmetic1 x, Arithmetic2 y,
       typename std::enable_if<
         std::is_arithmetic<Arithmetic1>::value
         && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
   {
-    using P = fmax_promoted_t<Arithmetic1, Arithmetic2>;
+    using P = promoted_t<Arithmetic1, Arithmetic2>;
     return fdim(static_cast<P>(x), static_cast<P>(y));
   }
 
@@ -893,42 +832,23 @@ namespace cex
   }
 
   // pow for general arithmetic types
-  template <typename A1, typename A2>
-  struct pow_promoted
-  {
-    using type = double;
-  };
-  template <typename A>
-  struct pow_promoted<long double, A>
-  {
-    using type = long double;
-  };
-  template <typename A>
-  struct pow_promoted<A, long double>
-  {
-    using type = long double;
-  };
-
-  template <typename A1, typename A2>
-  using pow_promoted_t = typename pow_promoted<A1, A2>::type;
-
   template <typename Arithmetic1, typename Arithmetic2>
-  constexpr pow_promoted_t<Arithmetic1, Arithmetic2> pow(
+  constexpr promoted_t<Arithmetic1, Arithmetic2> pow(
       Arithmetic1 x, Arithmetic2 y,
       typename std::enable_if<
         std::is_arithmetic<Arithmetic1>::value
         && std::is_arithmetic<Arithmetic2>::value>::type* = nullptr)
   {
-    using P = pow_promoted_t<Arithmetic1, Arithmetic2>;
+    using P = promoted_t<Arithmetic1, Arithmetic2>;
     return pow(static_cast<P>(x), static_cast<P>(y));
   }
   template <typename Arithmetic1>
-  constexpr pow_promoted_t<Arithmetic1, int> pow(
+  constexpr promoted_t<Arithmetic1, int> pow(
       Arithmetic1 x, int y,
       typename std::enable_if<
         std::is_arithmetic<Arithmetic1>::value>::type* = nullptr)
   {
-    using P = pow_promoted_t<Arithmetic1, int>;
+    using P = promoted_t<Arithmetic1, int>;
     return ipow(static_cast<P>(x), y);
   }
 }
