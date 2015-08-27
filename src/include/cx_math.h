@@ -1,13 +1,12 @@
 #pragma once
 
 #include <limits>
-#include <stdexcept>
 #include <type_traits>
 
 //----------------------------------------------------------------------------
 // constexpr math functions
 
-// Synopsis: all functions are in the cex namespace
+// Synopsis: all functions are in the cx namespace
 
 // -----------------------------------------------------------------------------
 // absolute value functions
@@ -214,15 +213,25 @@
 // long double pow(long double x, long double y);
 // Promoted pow(Arithmetic1 x, Arithmetic2 y);
 
-namespace cex
+namespace cx
 {
+  namespace detail
+  {
+    extern const char* abs_runtime_error;
+    extern const char* fabs_runtime_error;
+    extern const char* sqrt_domain_error;
+    extern const char* tan_domain_error;
+  }
+
   //----------------------------------------------------------------------------
   template <typename FloatingPoint>
   constexpr FloatingPoint abs(
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return x >= 0 ? x : -x;
+    return x >= 0 ? x :
+      x < 0 ? -x :
+      throw detail::abs_runtime_error;
   }
 
   namespace detail
@@ -242,14 +251,18 @@ namespace cex
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return x >= 0 ? x : -x;
+    return x >= 0 ? x :
+      x < 0 ? -x :
+      throw detail::fabs_runtime_error;
   }
   template <typename Integral>
   constexpr double fabs(
       Integral x,
       typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
-    return x >= 0 ? x : -x;
+    return x >= 0 ? x :
+      x < 0 ? -x :
+      throw detail::fabs_runtime_error;
   }
 
   //----------------------------------------------------------------------------
@@ -284,7 +297,9 @@ namespace cex
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return x == 0 ? 0 : detail::sqrt(x, x);
+    return x == 0 ? 0 :
+      x > 0 ? detail::sqrt(x, x) :
+      throw detail::sqrt_domain_error;
   }
   template <typename Integral>
   constexpr double sqrt(
@@ -447,7 +462,6 @@ namespace cex
   // tan(x) = sin(x)/cos(x) - cos(x) cannot be 0
   // the undefined symbol enforces that this function is evaluated at
   // compile-time (or it fails at link-time)
-  extern const char* tan_domain_error;
   template <typename FloatingPoint>
   constexpr FloatingPoint tan(
       FloatingPoint x,
@@ -455,7 +469,7 @@ namespace cex
   {
     return cos(x) != 0 ?
       sin(x) / cos(x) :
-      throw std::domain_error(tan_domain_error);
+      throw detail::tan_domain_error;
   }
   template <typename Integral>
   constexpr double tan(
@@ -464,7 +478,7 @@ namespace cex
   {
     return cos(x) != 0.0 ?
       sin(x) / cos(x) :
-      throw std::domain_error(tan_domain_error);
+      throw detail::tan_domain_error;
   }
 
   //----------------------------------------------------------------------------
@@ -524,7 +538,7 @@ namespace cex
       y < 0 && x < 0 ? atan(y/x) - static_cast<FloatingPoint>(detail::pi()) :
       y > 0 && x == 0 ? static_cast<FloatingPoint>(detail::pi()/2.0l) :
       y < 0 && x == 0 ? -static_cast<FloatingPoint>(detail::pi()/2.0l) :
-      throw std::domain_error(atan_domain_error);
+      throw atan_domain_error;
   }
 
   // atan2 for general arithmetic types
@@ -549,7 +563,7 @@ namespace cex
   {
     return x >= FloatingPoint{-1} && x <= FloatingPoint{1} ?
       FloatingPoint{2} * atan(x / (FloatingPoint{1} + sqrt(FloatingPoint{1} - x*x))) :
-      throw std::domain_error(asin_domain_error);
+      throw asin_domain_error;
   }
   template <typename Integral>
   constexpr double asin(
@@ -568,7 +582,7 @@ namespace cex
     return x == FloatingPoint{-1} ? static_cast<FloatingPoint>(detail::pi()) :
       x >= FloatingPoint{-1} && x <= FloatingPoint{1} ?
       FloatingPoint{2} * atan(sqrt(FloatingPoint{1} - x*x) / (FloatingPoint{1} + x)) :
-      throw std::domain_error(acos_domain_error);
+      throw acos_domain_error;
   }
   template <typename Integral>
   constexpr double acos(
@@ -779,18 +793,18 @@ namespace cex
   constexpr float fmod(float x, float y)
   {
     return y != 0 ? x - trunc(x/y)*y :
-      throw std::domain_error(fmod_domain_error);
+      throw fmod_domain_error;
   }
   constexpr double fmod(double x, double y)
   {
     return y != 0 ? x - trunc(x/y)*y :
-      throw std::domain_error(fmod_domain_error);
+      throw fmod_domain_error;
   }
   #if __cplusplus == 201402L
   constexpr long double fmod(long double x, long double y)
   {
     return y != 0 ? x - trunc(x/y)*y :
-      throw std::domain_error(fmod_domain_error);
+      throw fmod_domain_error;
   }
   #endif
 
@@ -836,18 +850,18 @@ namespace cex
   constexpr float remainder(float x, float y)
   {
     return y != 0 ? x - y*round(x/y) :
-      throw std::domain_error(remainder_domain_error);
+      throw remainder_domain_error;
   }
   constexpr double remainder(double x, double y)
   {
     return y != 0 ? x - y*round(x/y) :
-      throw std::domain_error(remainder_domain_error);
+      throw remainder_domain_error;
   }
   #if __cplusplus == 201402L
   constexpr long double remainder(long double x, long double y)
   {
     return y != 0 ? x - y*round(x/y) :
-      throw std::domain_error(remainder_domain_error);
+      throw remainder_domain_error;
   }
   #endif
 
@@ -929,7 +943,7 @@ namespace cex
     template <typename T>
     constexpr T log_iter(T x, T y)
     {
-      return y + T{2} * (x - cex::exp(y)) / (x + cex::exp(y));
+      return y + T{2} * (x - cx::exp(y)) / (x + cx::exp(y));
     }
     template <typename T>
     constexpr T log(T x, T y)
@@ -944,7 +958,7 @@ namespace cex
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
     return x > 0 ? detail::log(x, FloatingPoint{0}) :
-      throw std::domain_error(log_domain_error);
+      throw log_domain_error;
   }
   template <typename Integral>
   constexpr double log(
@@ -1026,7 +1040,7 @@ namespace cex
   {
     return cosh(x) != 0 ?
       sinh(x) / cosh(x) :
-      throw std::domain_error(tanh_domain_error);
+      throw tanh_domain_error;
   }
   template <typename Integral>
   constexpr double tanh(
@@ -1035,7 +1049,7 @@ namespace cex
   {
     return cosh(x) != 0.0 ?
       sinh(x) / cosh(x) :
-      throw std::domain_error(tanh_domain_error);
+      throw tanh_domain_error;
   }
 
   //----------------------------------------------------------------------------
@@ -1062,7 +1076,7 @@ namespace cex
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
     return x >= 1 ? log(x + sqrt(x*x - FloatingPoint{1})) :
-      throw std::domain_error(acosh_domain_error);
+      throw acosh_domain_error;
   }
   template <typename Integral>
   constexpr double acosh(
@@ -1082,7 +1096,7 @@ namespace cex
       x > -1 && x < 1 ?
       (FloatingPoint{1}/FloatingPoint{2})
         * log((FloatingPoint{1} + x) / (FloatingPoint{1} - x)) :
-      throw std::domain_error(atanh_domain_error);
+      throw atanh_domain_error;
   }
   template <typename Integral>
   constexpr double atanh(

@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------
 // constexpr string hashing
 
-namespace cex
+namespace cx
 {
   namespace detail
   {

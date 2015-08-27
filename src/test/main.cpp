@@ -1,5 +1,5 @@
-extern void test_constexpr_math();
-extern void test_constexpr_hash();
+extern void test_cx_math();
+extern void test_cx_hash();
 
 int main(int, char* [])
 {
