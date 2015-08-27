@@ -5,6 +5,213 @@
 //----------------------------------------------------------------------------
 // constexpr math functions
 
+// Synopsis: all functions are in the cex namespace
+
+// -----------------------------------------------------------------------------
+// absolute value functions
+
+// float abs(float x);
+// double abs(double x);
+// long double abs(long double x);
+
+// float fabs(float x);
+// double fabs(double x);
+// long double fabs(long double x);
+// double fabs(Integral x);
+
+// -----------------------------------------------------------------------------
+// square root functions
+
+// float sqrt(float x);
+// double sqrt(double x);
+// long double sqrt(long double x);
+// double sqrt(Integral x);
+
+// -----------------------------------------------------------------------------
+// cube root functions
+
+// float cbrt(float x);
+// double cbrt(double x);
+// long double cbrt(long double x);
+// double cbrt(Integral x);
+
+// -----------------------------------------------------------------------------
+// hypotenuse function (returns the square root of the sum of the squares)
+
+// float hypot(float x, float y);
+// double hypot(double x, double y);
+// long double hypot(long double x, long double y);
+// Promoted hypot(Arithmetic1 x, Arithmetic2 y);
+
+// Promotion rules:
+// When either of Arithmetic1 or Arithmetic2 is long double, Promoted is long
+// double. Otherwise Promoted is double.
+
+// -----------------------------------------------------------------------------
+// exponent function (e^x)
+
+// float exp(float x);
+// double exp(double x);
+// long double exp(long double x);
+// double exp(Integral x);
+
+// -----------------------------------------------------------------------------
+// trigonometric functions
+
+// float sin(float x);
+// double sin(double x);
+// long double sin(long double x);
+// double sin(Integral x);
+
+// float cos(float x);
+// double cos(double x);
+// long double cos(long double x);
+// double cos(Integral x);
+
+// float tan(float x);
+// double tan(double x);
+// long double tan(long double x);
+// double tan(Integral x);
+
+// -----------------------------------------------------------------------------
+// inverse trigonometric functions
+
+// float asin(float x);
+// double asin(double x);
+// long double asin(long double x);
+// double asin(Integral x);
+
+// float acos(float x);
+// double acos(double x);
+// long double acos(long double x);
+// double acos(Integral x);
+
+// float atan(float x);
+// double atan(double x);
+// long double atan(long double x);
+// double atan(Integral x);
+
+// float atan2(float x, float y);
+// double atan2(double x, double y);
+// long double atan2(long double x, long double y);
+// Promoted atan2(Arithmetic1 x, Arithmetic2 y);
+
+// -----------------------------------------------------------------------------
+// rounding functions (long double versions exist only for C++14)
+
+// float floor(float x);
+// double floor(double x);
+// long double floor(long double x);
+// double floor(Integral x);
+
+// float ceil(float x);
+// double ceil(double x);
+// long double ceil(long double x);
+// double ceil(Integral x);
+
+// float trunc(float x);
+// double trunc(double x);
+// long double trunc(long double x);
+// double trunc(Integral x);
+
+// float round(float x);
+// double round(double x);
+// long double round(long double x);
+// double round(Integral x);
+
+// -----------------------------------------------------------------------------
+// remainder functions (long double versions exist only for C++14)
+
+// float fmod(float x, float y);
+// double fmod(double x, double y);
+// long double fmod(long double x, long double y);
+// Promoted fmod(Arithmetic1 x, Arithmetic2 y);
+
+// float remainder(float x, float y);
+// double remainder(double x, double y);
+// long double remainder(long double x, long double y);
+// Promoted remainder(Arithmetic1 x, Arithmetic2 y);
+
+// -----------------------------------------------------------------------------
+// max/min functions
+
+// float fmax(float x, float y);
+// double fmax(double x, double y);
+// long double fmax(long double x, long double y);
+// Promoted fmax(Arithmetic1 x, Arithmetic2 y);
+
+// float fmin(float x, float y);
+// double fmin(double x, double y);
+// long double fmin(long double x, long double y);
+// Promoted fmin(Arithmetic1 x, Arithmetic2 y);
+
+// float fdim(float x, float y);
+// double fdim(double x, double y);
+// long double fdim(long double x, long double y);
+// Promoted fdim(Arithmetic1 x, Arithmetic2 y);
+
+// -----------------------------------------------------------------------------
+// logarithm functions
+
+// float log(float x);
+// double log(double x);
+// long double log(long double x);
+// double log(Integral x);
+
+// float log10(float x);
+// double log10(double x);
+// long double log10(long double x);
+// double log10(Integral x);
+
+// float log2(float x);
+// double log2(double x);
+// long double log2(long double x);
+// double log2(Integral x);
+
+// -----------------------------------------------------------------------------
+// hyperbolic functions
+
+// float sinh(float x);
+// double sinh(double x);
+// long double sinh(long double x);
+// double sinh(Integral x);
+
+// float cosh(float x);
+// double cosh(double x);
+// long double cosh(long double x);
+// double cosh(Integral x);
+
+// float tanh(float x);
+// double tanh(double x);
+// long double tanh(long double x);
+// double tanh(Integral x);
+
+// -----------------------------------------------------------------------------
+// inverse hyperbolic functions
+
+// float asinh(float x);
+// double asinh(double x);
+// long double asinh(long double x);
+// double asinh(Integral x);
+
+// float acosh(float x);
+// double acosh(double x);
+// long double acosh(long double x);
+// double acosh(Integral x);
+
+// float atanh(float x);
+// double atanh(double x);
+// long double atanh(long double x);
+// double atanh(Integral x);
+
+// -----------------------------------------------------------------------------
+// power function
+
+// float pow(float x, float y);
+// double pow(double x, double y);
+// long double pow(long double x, long double y);
+// Promoted pow(Arithmetic1 x, Arithmetic2 y);
+
 namespace cex
 {
   //----------------------------------------------------------------------------
@@ -23,7 +230,7 @@ namespace cex
     template <typename T>
     constexpr bool feq(T x, T y)
     {
-      return cex::abs(x - y) <= std::numeric_limits<T>::epsilon();
+      return abs(x - y) <= std::numeric_limits<T>::epsilon();
     }
   }
 
@@ -45,15 +252,18 @@ namespace cex
 
   //----------------------------------------------------------------------------
   // raise to integer power
-  template <typename FloatingPoint>
-  constexpr FloatingPoint ipow(
-      FloatingPoint x, int n,
-      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  namespace detail
   {
-    return (n == 0) ? FloatingPoint{1} :
+    template <typename FloatingPoint>
+    constexpr FloatingPoint ipow(
+        FloatingPoint x, int n,
+        typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+    {
+      return (n == 0) ? FloatingPoint{1} :
       n == 1 ? x :
-      n > 1 ? ((n & 1) ? x * ipow(x, n-1) : ipow(x, n/2) * ipow(x, n/2)) :
-      FloatingPoint{1} / ipow(x, -n);
+        n > 1 ? ((n & 1) ? x * ipow(x, n-1) : ipow(x, n/2) * ipow(x, n/2)) :
+        FloatingPoint{1} / ipow(x, -n);
+    }
   }
 
   //----------------------------------------------------------------------------
@@ -436,14 +646,14 @@ namespace cex
     return x < 0 ? -ceil(-x) :
       detail::floor(
           x, 0.0f,
-          ipow(2.0f, std::numeric_limits<float>::max_exponent-1));
+          detail::ipow(2.0f, std::numeric_limits<float>::max_exponent-1));
   }
   constexpr double floor(double x)
   {
     return x < 0 ? -ceil(-x) :
       detail::floor(
           x, 0.0,
-          ipow(2.0, std::numeric_limits<double>::max_exponent-1));
+          detail::ipow(2.0, std::numeric_limits<double>::max_exponent-1));
   }
   template <typename Integral>
   constexpr double floor(
@@ -457,15 +667,15 @@ namespace cex
   {
     return x < 0 ? -floor(-x) :
       detail::ceil(
-          x, ipow(2.0f, std::numeric_limits<float>::max_exponent-1),
-          ipow(2.0f, std::numeric_limits<float>::max_exponent-1));
+          x, detail::ipow(2.0f, std::numeric_limits<float>::max_exponent-1),
+          detail::ipow(2.0f, std::numeric_limits<float>::max_exponent-1));
   }
   constexpr double ceil(double x)
   {
     return x < 0 ? -floor(-x) :
       detail::ceil(
-          x, ipow(2.0, std::numeric_limits<double>::max_exponent-1),
-          ipow(2.0, std::numeric_limits<double>::max_exponent-1));
+          x, detail::ipow(2.0, std::numeric_limits<double>::max_exponent-1),
+          detail::ipow(2.0, std::numeric_limits<double>::max_exponent-1));
   }
   template <typename Integral>
   constexpr double ceil(
@@ -481,7 +691,7 @@ namespace cex
   constexpr long double floor(long double x)
   {
     if (x < 0.0) return -ceil(-x);
-    long double inc = ipow(2.0l, std::numeric_limits<long double>::max_exponent - 1);
+    long double inc = detail::ipow(2.0l, std::numeric_limits<long double>::max_exponent - 1);
     long double guess = 0.0l;
     for (;;)
     {
@@ -497,7 +707,7 @@ namespace cex
   constexpr long double ceil(long double x)
   {
     if (x < 0.0l) return -floor(-x);
-    long double dec = ipow(2.0l, std::numeric_limits<long double>::max_exponent - 1);
+    long double dec = detail::ipow(2.0l, std::numeric_limits<long double>::max_exponent - 1);
     long double guess = dec;
     for (;;)
     {
@@ -895,7 +1105,7 @@ namespace cex
       FloatingPoint x, int y,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return ipow(x, y);
+    return detail::ipow(x, y);
   }
 
   // pow for general arithmetic types
@@ -909,13 +1119,12 @@ namespace cex
     using P = promoted_t<Arithmetic1, Arithmetic2>;
     return pow(static_cast<P>(x), static_cast<P>(y));
   }
-  template <typename Arithmetic1>
-  constexpr promoted_t<Arithmetic1, int> pow(
-      Arithmetic1 x, int y,
+  template <typename Integral>
+  constexpr promoted_t<Integral, int> pow(
+      Integral x, int y,
       typename std::enable_if<
-        std::is_arithmetic<Arithmetic1>::value>::type* = nullptr)
+        std::is_integral<Integral>::value>::type* = nullptr)
   {
-    using P = promoted_t<Arithmetic1, int>;
-    return ipow(static_cast<P>(x), y);
+    return detail::ipow(static_cast<double>(x), y);
   }
 }

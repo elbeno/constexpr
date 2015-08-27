@@ -33,11 +33,6 @@ int main(int, char* [])
   static_assert(1.0 == cex::fabs(-1), "fabs(1)");
 
   //----------------------------------------------------------------------------
-  // ipow
-  static_assert(feq(9.0f, cex::ipow(3.0f, 2)), "ipow(3.0f, 2)");
-  static_assert(feq(0.111111f, cex::ipow(3.0f, -2)), "ipow(3.0f, -2)");
-
-  //----------------------------------------------------------------------------
   // sqrt
   // square root of 2 = 1.414213562373095048802
   static_assert(feq(1.0f, cex::sqrt(1.0f)), "sqrt(1.0f)");
@@ -348,6 +343,8 @@ int main(int, char* [])
 
   //----------------------------------------------------------------------------
   // pow
+  static_assert(feq(9.0f, cex::pow(3.0f, 2)), "pow(3.0f, 2)");
+  static_assert(feq(0.111111f, cex::pow(3.0f, -2)), "pow(3.0f, -2)");
   static_assert(feq(1024.0, cex::pow(2, 10)), "pow(2, 10)");
   static_assert(feq(-0.125, cex::pow(-2, -3)), "pow(-2, -3)");
   // square root of 2 = 1.414213562373095048802
