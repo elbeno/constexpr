@@ -8,7 +8,7 @@ constexpr bool feq(T x, T y)
   return cex::abs(x - y) <= std::numeric_limits<T>::epsilon();
 }
 
-int main(int, char* [])
+void test_constexpr_math()
 {
   // All constants referenced from Wolfram Alpha :)
 
@@ -351,4 +351,9 @@ int main(int, char* [])
   static_assert(feq(1.4142136f, cex::pow(2.0f, 0.5f)), "pow(2.0f, 0.5f)");
   static_assert(feq(1.4142135623730953, cex::pow(2.0, 0.5)), "pow(2.0, 0.5)");
   static_assert(feq(1.4142135623730950488l, cex::pow(2.0l, 0.5l)), "pow(2.0l, 0.5l)");
+}
+
+int main(int, char* [])
+{
+  return 0;
 }
