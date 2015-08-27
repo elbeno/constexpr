@@ -16,6 +16,17 @@ namespace cex
     return x >= 0 ? x : -x;
   }
 
+  namespace detail
+  {
+    // test whether values are within machine epsilon, used for algorithm
+    // termination
+    template <typename T>
+    constexpr bool feq(T x, T y)
+    {
+      return cex::abs(x - y) <= std::numeric_limits<T>::epsilon();
+    }
+  }
+
   //----------------------------------------------------------------------------
   template <typename FloatingPoint>
   constexpr FloatingPoint fabs(
@@ -52,7 +63,7 @@ namespace cex
     template <typename T>
     constexpr T sqrt(T x, T guess)
     {
-      return (guess + x/guess)/T{2} == guess ? guess :
+      return feq(guess, (guess + x/guess)/T{2}) ? guess :
         sqrt(x, (guess + x/guess)/T{2});
     }
   }
@@ -78,7 +89,7 @@ namespace cex
     template <typename T>
     constexpr T cbrt(T x, T guess)
     {
-      return (T{2}*guess + x/(guess*guess))/T{3} == guess ? guess :
+      return feq(guess, (T{2}*guess + x/(guess*guess))/T{3}) ? guess :
         cbrt(x, (T{2}*guess + x/(guess*guess))/T{3});
     }
   }
@@ -146,7 +157,7 @@ namespace cex
     template <typename T>
     constexpr T exp(T x, T sum, T n, int i, T t)
     {
-      return sum + t/n == sum ?
+      return feq(sum, sum + t/n) ?
         sum :
         exp(x, sum + t/n, n * i, i+1, t * x);
     }
@@ -175,7 +186,7 @@ namespace cex
     template <typename T>
     constexpr T trig_series(T x, T sum, T n, int i, int s, T t)
     {
-      return sum + t*s/n == sum ?
+      return feq(sum, sum + t*s/n) ?
         sum :
         trig_series(x, sum + t*s/n, n*i*(i+1), i+2, -s, t*x*x);
     }
@@ -267,6 +278,10 @@ namespace cex
         sum :
         atan_sum(x, sum + atan_product(x, n), n+1);
     }
+    constexpr long double pi()
+    {
+      return 3.1415926535897932385l;
+    }
   }
   template <typename FloatingPoint>
   constexpr FloatingPoint atan(
@@ -292,12 +307,11 @@ namespace cex
       FloatingPoint x, FloatingPoint y,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    const long double pi = 3.1415926535897932385l;
     return x > 0 ? atan(y/x) :
-      y >= 0 && x < 0 ? atan(y/x) + static_cast<FloatingPoint>(pi) :
-      y < 0 && x < 0 ? atan(y/x) - static_cast<FloatingPoint>(pi) :
-      y > 0 && x == 0 ? static_cast<FloatingPoint>(pi/2.0l) :
-      y < 0 && x == 0 ? -static_cast<FloatingPoint>(pi/2.0l) :
+      y >= 0 && x < 0 ? atan(y/x) + static_cast<FloatingPoint>(detail::pi()) :
+      y < 0 && x < 0 ? atan(y/x) - static_cast<FloatingPoint>(detail::pi()) :
+      y > 0 && x == 0 ? static_cast<FloatingPoint>(detail::pi()/2.0l) :
+      y < 0 && x == 0 ? -static_cast<FloatingPoint>(detail::pi()/2.0l) :
       throw std::domain_error(atan_domain_error);
   }
 
@@ -339,8 +353,7 @@ namespace cex
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    const long double pi = 3.1415926535897932385l;
-    return x == FloatingPoint{-1} ? static_cast<FloatingPoint>(pi) :
+    return x == FloatingPoint{-1} ? static_cast<FloatingPoint>(detail::pi()) :
       x >= FloatingPoint{-1} && x <= FloatingPoint{1} ?
       FloatingPoint{2} * atan(sqrt(FloatingPoint{1} - x*x) / (FloatingPoint{1} + x)) :
       throw std::domain_error(acos_domain_error);
@@ -701,11 +714,6 @@ namespace cex
   // domain error occurs if x <= 0
   namespace detail
   {
-    template <typename T>
-    constexpr bool feq(T x, T y)
-    {
-      return cex::abs(x - y) <= std::numeric_limits<T>::epsilon();
-    }
     template <typename T>
     constexpr T log_iter(T x, T y)
     {

@@ -304,9 +304,9 @@ int main(int, char* [])
   static_assert(feq(0.0, cex::log2(1)), "log2(1)");
 
   // log2(10) = 3.321928094887362347870
-  static_assert(feq(3.321928f, cex::log2(10.0f)), "log2(10.0f)");
-  static_assert(feq(3.321928094887361, cex::log2(10.0)), "log2(10.0)");
-  static_assert(feq(3.3219280948873623479l, cex::log2(10.0l)), "log2(10.0l)");
+  static_assert(feq(3.3219278f, cex::log2(10.0f)), "log2(10.0f)");
+  static_assert(feq(3.3219280948873604, cex::log2(10.0)), "log2(10.0)");
+  static_assert(feq(3.321928094887362348l, cex::log2(10.0l)), "log2(10.0l)");
 
   //----------------------------------------------------------------------------
   // sinh, cosh, tanh
