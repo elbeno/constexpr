@@ -221,6 +221,15 @@ namespace cx
     extern const char* fabs_runtime_error;
     extern const char* sqrt_domain_error;
     extern const char* tan_domain_error;
+    extern const char* atan_domain_error;
+    extern const char* asin_domain_error;
+    extern const char* acos_domain_error;
+    extern const char* fmod_domain_error;
+    extern const char* remainder_domain_error;
+    extern const char* log_domain_error;
+    extern const char* tanh_domain_error;
+    extern const char* acosh_domain_error;
+    extern const char* atanh_domain_error;
   }
 
   //----------------------------------------------------------------------------
@@ -527,7 +536,6 @@ namespace cx
       detail::atan_sum<double>(x, 1.0, 1);
   }
 
-  extern const char* atan_domain_error;
   template <typename FloatingPoint>
   constexpr FloatingPoint atan2(
       FloatingPoint x, FloatingPoint y,
@@ -538,7 +546,7 @@ namespace cx
       y < 0 && x < 0 ? atan(y/x) - static_cast<FloatingPoint>(detail::pi()) :
       y > 0 && x == 0 ? static_cast<FloatingPoint>(detail::pi()/2.0l) :
       y < 0 && x == 0 ? -static_cast<FloatingPoint>(detail::pi()/2.0l) :
-      throw atan_domain_error;
+      throw detail::atan_domain_error;
   }
 
   // atan2 for general arithmetic types
@@ -555,7 +563,6 @@ namespace cx
 
   //----------------------------------------------------------------------------
   // inverse trig functions
-  extern const char* asin_domain_error;
   template <typename FloatingPoint>
   constexpr FloatingPoint asin(
       FloatingPoint x,
@@ -563,7 +570,7 @@ namespace cx
   {
     return x >= FloatingPoint{-1} && x <= FloatingPoint{1} ?
       FloatingPoint{2} * atan(x / (FloatingPoint{1} + sqrt(FloatingPoint{1} - x*x))) :
-      throw asin_domain_error;
+      throw detail::asin_domain_error;
   }
   template <typename Integral>
   constexpr double asin(
@@ -573,7 +580,6 @@ namespace cx
     return asin<double>(x);
   }
 
-  extern const char* acos_domain_error;
   template <typename FloatingPoint>
   constexpr FloatingPoint acos(
       FloatingPoint x,
@@ -582,7 +588,7 @@ namespace cx
     return x == FloatingPoint{-1} ? static_cast<FloatingPoint>(detail::pi()) :
       x >= FloatingPoint{-1} && x <= FloatingPoint{1} ?
       FloatingPoint{2} * atan(sqrt(FloatingPoint{1} - x*x) / (FloatingPoint{1} + x)) :
-      throw acos_domain_error;
+      throw detail::acos_domain_error;
   }
   template <typename Integral>
   constexpr double acos(
@@ -789,22 +795,21 @@ namespace cx
 
   //----------------------------------------------------------------------------
   // fmod: floating-point remainder function
-  extern const char* fmod_domain_error;
   constexpr float fmod(float x, float y)
   {
     return y != 0 ? x - trunc(x/y)*y :
-      throw fmod_domain_error;
+      throw detail::fmod_domain_error;
   }
   constexpr double fmod(double x, double y)
   {
     return y != 0 ? x - trunc(x/y)*y :
-      throw fmod_domain_error;
+      throw detail::fmod_domain_error;
   }
   #if __cplusplus == 201402L
   constexpr long double fmod(long double x, long double y)
   {
     return y != 0 ? x - trunc(x/y)*y :
-      throw fmod_domain_error;
+      throw detail::fmod_domain_error;
   }
   #endif
 
@@ -846,22 +851,21 @@ namespace cx
 
   //----------------------------------------------------------------------------
   // remainder: signed floating-point remainder function
-  extern const char* remainder_domain_error;
   constexpr float remainder(float x, float y)
   {
     return y != 0 ? x - y*round(x/y) :
-      throw remainder_domain_error;
+      throw detail::remainder_domain_error;
   }
   constexpr double remainder(double x, double y)
   {
     return y != 0 ? x - y*round(x/y) :
-      throw remainder_domain_error;
+      throw detail::remainder_domain_error;
   }
   #if __cplusplus == 201402L
   constexpr long double remainder(long double x, long double y)
   {
     return y != 0 ? x - y*round(x/y) :
-      throw remainder_domain_error;
+      throw detail::remainder_domain_error;
   }
   #endif
 
@@ -951,14 +955,13 @@ namespace cx
       return feq(y, log_iter(x, y)) ? y : log(x, log_iter(x, y));
     }
   }
-  extern const char* log_domain_error;
   template <typename FloatingPoint>
   constexpr FloatingPoint log(
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
     return x > 0 ? detail::log(x, FloatingPoint{0}) :
-      throw log_domain_error;
+      throw detail::log_domain_error;
   }
   template <typename Integral>
   constexpr double log(
@@ -1032,7 +1035,6 @@ namespace cx
     return (exp<double>(x) + exp<double>(-x)) / 2.0;
   }
 
-  extern const char* tanh_domain_error;
   template <typename FloatingPoint>
   constexpr FloatingPoint tanh(
       FloatingPoint x,
@@ -1040,7 +1042,7 @@ namespace cx
   {
     return cosh(x) != 0 ?
       sinh(x) / cosh(x) :
-      throw tanh_domain_error;
+      throw detail::tanh_domain_error;
   }
   template <typename Integral>
   constexpr double tanh(
@@ -1049,7 +1051,7 @@ namespace cx
   {
     return cosh(x) != 0.0 ?
       sinh(x) / cosh(x) :
-      throw tanh_domain_error;
+      throw detail::tanh_domain_error;
   }
 
   //----------------------------------------------------------------------------
@@ -1069,14 +1071,13 @@ namespace cx
     return asinh<double>(x);
   }
 
-  extern const char* acosh_domain_error;
   template <typename FloatingPoint>
   constexpr FloatingPoint acosh(
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
     return x >= 1 ? log(x + sqrt(x*x - FloatingPoint{1})) :
-      throw acosh_domain_error;
+      throw detail::acosh_domain_error;
   }
   template <typename Integral>
   constexpr double acosh(
@@ -1086,7 +1087,6 @@ namespace cx
     return acosh<double>(x);
   }
 
-  extern const char* atanh_domain_error;
   template <typename FloatingPoint>
   constexpr FloatingPoint atanh(
       FloatingPoint x,
@@ -1096,7 +1096,7 @@ namespace cx
       x > -1 && x < 1 ?
       (FloatingPoint{1}/FloatingPoint{2})
         * log((FloatingPoint{1} + x) / (FloatingPoint{1} - x)) :
-      throw atanh_domain_error;
+      throw detail::atanh_domain_error;
   }
   template <typename Integral>
   constexpr double atanh(
