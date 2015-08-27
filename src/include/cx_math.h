@@ -3,7 +3,7 @@
 #include <limits>
 #include <type_traits>
 
-//----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // constexpr math functions
 
 // Synopsis: all functions are in the cx namespace
@@ -220,16 +220,27 @@ namespace cx
     extern const char* abs_runtime_error;
     extern const char* fabs_runtime_error;
     extern const char* sqrt_domain_error;
+    extern const char* cbrt_runtime_error;
+    extern const char* exp_runtime_error;
+    extern const char* sin_runtime_error;
+    extern const char* cos_runtime_error;
     extern const char* tan_domain_error;
-    extern const char* atan_domain_error;
+    extern const char* atan_runtime_error;
+    extern const char* atan2_domain_error;
     extern const char* asin_domain_error;
     extern const char* acos_domain_error;
+    extern const char* floor_runtime_error;
+    extern const char* ceil_runtime_error;
     extern const char* fmod_domain_error;
     extern const char* remainder_domain_error;
+    extern const char* fmax_runtime_error;
+    extern const char* fmin_runtime_error;
+    extern const char* fdim_runtime_error;
     extern const char* log_domain_error;
     extern const char* tanh_domain_error;
     extern const char* acosh_domain_error;
     extern const char* atanh_domain_error;
+    extern const char* pow_runtime_error;
   }
 
   //----------------------------------------------------------------------------
@@ -334,7 +345,8 @@ namespace cx
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return detail::cbrt(x, FloatingPoint{1});
+    return true ? detail::cbrt(x, FloatingPoint{1}) :
+      throw detail::cbrt_runtime_error;
   }
   template <typename Integral>
   constexpr double cbrt(
@@ -371,6 +383,11 @@ namespace cx
   {
     using type = long double;
   };
+  template <>
+  struct promoted<long double, long double>
+  {
+    using type = long double;
+  };
 
   template <typename A1, typename A2>
   using promoted_t = typename promoted<A1, A2>::type;
@@ -403,8 +420,8 @@ namespace cx
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return detail::exp(
-        x, FloatingPoint{1}, FloatingPoint{1}, 2, x);
+    return true ? detail::exp(x, FloatingPoint{1}, FloatingPoint{1}, 2, x) :
+      throw detail::exp_runtime_error;
   }
   template <typename Integral>
   constexpr double exp(
@@ -432,17 +449,16 @@ namespace cx
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return detail::trig_series(
-        x, x, FloatingPoint{6}, 4, -1, x*x*x);
+    return true ?
+      detail::trig_series(x, x, FloatingPoint{6}, 4, -1, x*x*x) :
+      throw detail::sin_runtime_error;
   }
   template <typename Integral>
   constexpr double sin(
       Integral x,
       typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
-    return detail::trig_series<double>(
-        x, x, 6.0, 4, -1,
-        static_cast<double>(x)*static_cast<double>(x)*static_cast<double>(x));
+    return sin<double>(x);
   }
 
   //----------------------------------------------------------------------------
@@ -454,8 +470,9 @@ namespace cx
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return detail::trig_series(
-        x, FloatingPoint{1}, FloatingPoint{2}, 3, -1, x*x);
+    return true ?
+      detail::trig_series(x, FloatingPoint{1}, FloatingPoint{2}, 3, -1, x*x) :
+      throw detail::cos_runtime_error;
   }
   template <typename Integral>
   constexpr double cos(
@@ -523,17 +540,16 @@ namespace cx
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return x / (FloatingPoint{1} + x*x) *
-      detail::atan_sum(x, FloatingPoint{1}, 1);
+    return true ?
+      x / (FloatingPoint{1} + x*x) * detail::atan_sum(x, FloatingPoint{1}, 1) :
+      throw detail::atan_runtime_error;
   }
   template <typename Integral>
   constexpr double atan(
       Integral x,
       typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
-    return
-      static_cast<double>(x) / (1.0 + static_cast<double>(x)*static_cast<double>(x)) *
-      detail::atan_sum<double>(x, 1.0, 1);
+    return atan<double>(x);
   }
 
   template <typename FloatingPoint>
@@ -546,7 +562,7 @@ namespace cx
       y < 0 && x < 0 ? atan(y/x) - static_cast<FloatingPoint>(detail::pi()) :
       y > 0 && x == 0 ? static_cast<FloatingPoint>(detail::pi()/2.0l) :
       y < 0 && x == 0 ? -static_cast<FloatingPoint>(detail::pi()/2.0l) :
-      throw detail::atan_domain_error;
+      throw detail::atan2_domain_error;
   }
 
   // atan2 for general arithmetic types
@@ -666,45 +682,51 @@ namespace cx
   constexpr float floor(float x)
   {
     return x < 0 ? -ceil(-x) :
-      detail::floor(
+      x >= 0 ? detail::floor(
           x, 0.0f,
-          detail::ipow(2.0f, std::numeric_limits<float>::max_exponent-1));
+          detail::ipow(2.0f, std::numeric_limits<float>::max_exponent-1)) :
+      throw detail::floor_runtime_error;
   }
   constexpr double floor(double x)
   {
     return x < 0 ? -ceil(-x) :
-      detail::floor(
+      x >= 0 ? detail::floor(
           x, 0.0,
-          detail::ipow(2.0, std::numeric_limits<double>::max_exponent-1));
+          detail::ipow(2.0, std::numeric_limits<double>::max_exponent-1)) :
+      throw detail::floor_runtime_error;
   }
   template <typename Integral>
   constexpr double floor(
       Integral x,
       typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
   {
-    return x;
+    return true ? x :
+      throw detail::floor_runtime_error;
   }
 
   constexpr float ceil(float x)
   {
     return x < 0 ? -floor(-x) :
-      detail::ceil(
+      x >= 0 ? detail::ceil(
           x, detail::ipow(2.0f, std::numeric_limits<float>::max_exponent-1),
-          detail::ipow(2.0f, std::numeric_limits<float>::max_exponent-1));
+          detail::ipow(2.0f, std::numeric_limits<float>::max_exponent-1)) :
+      throw detail::ceil_runtime_error;
   }
   constexpr double ceil(double x)
   {
     return x < 0 ? -floor(-x) :
-      detail::ceil(
+      x >= 0 ? detail::ceil(
           x, detail::ipow(2.0, std::numeric_limits<double>::max_exponent-1),
-          detail::ipow(2.0, std::numeric_limits<double>::max_exponent-1));
+          detail::ipow(2.0, std::numeric_limits<double>::max_exponent-1)) :
+      throw detail::ceil_runtime_error;
   }
   template <typename Integral>
   constexpr double ceil(
       Integral x,
       typename std::enable_if<std::is_integral<Integral>::value>::type*)
   {
-    return x;
+    return true ? x :
+      throw detail::ceil_runtime_error;
   }
 
   // See above: long double floor/ceil only available for C++14 constexpr
@@ -725,6 +747,7 @@ namespace cx
       }
       guess += inc;
     }
+    throw detail::floor_runtime_error;
   }
   constexpr long double ceil(long double x)
   {
@@ -741,6 +764,7 @@ namespace cx
       }
       guess -= dec;
     }
+    throw detail::ceil_runtime_error;
   }
   #endif
 
@@ -889,21 +913,27 @@ namespace cx
       FloatingPoint x, FloatingPoint y,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return x > y ? x : y;
+    return x >= y ? x :
+      x < y ? y :
+      throw detail::fmax_runtime_error;
   }
   template <typename FloatingPoint>
   constexpr FloatingPoint fmin(
       FloatingPoint x, FloatingPoint y,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return x > y ? y : x;
+    return y >= x ? x :
+      y < x ? y :
+      throw detail::fmin_runtime_error;
   }
   template <typename FloatingPoint>
   constexpr FloatingPoint fdim(
       FloatingPoint x, FloatingPoint y,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return x > y ? x-y : 0;
+    return x > y ? x-y :
+      x <= y ? 0 :
+      throw detail::fdim_runtime_error;
   }
 
   // fmax/fmin/fdim for general arithmetic types
@@ -1114,14 +1144,16 @@ namespace cx
       FloatingPoint x, FloatingPoint y,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return exp(log(x)*y);
+    return true ? exp(log(x)*y) :
+      throw detail::pow_runtime_error;
   }
   template <typename FloatingPoint>
   constexpr FloatingPoint pow(
       FloatingPoint x, int y,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return detail::ipow(x, y);
+    return true ? detail::ipow(x, y) :
+      throw detail::pow_runtime_error;
   }
 
   // pow for general arithmetic types
@@ -1141,6 +1173,7 @@ namespace cx
       typename std::enable_if<
         std::is_integral<Integral>::value>::type* = nullptr)
   {
-    return detail::ipow(static_cast<double>(x), y);
+    return true ? detail::ipow(static_cast<double>(x), y) :
+      throw detail::pow_runtime_error;
   }
 }

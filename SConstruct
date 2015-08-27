@@ -40,6 +40,8 @@ env.Replace(CXX = compiler)
 if compiler[:5] == 'clang':
     env.Append(CCFLAGS = "-stdlib=libc++")
     env.Append(LINKFLAGS = "-lc++")
+else:
+    env.Append(CCFLAGS = "-Wno-sign-conversion")
 
 env['PROJNAME'] = os.path.basename(Dir('.').srcnode().abspath)
 print env['PROJNAME']
