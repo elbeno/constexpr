@@ -9,6 +9,10 @@ namespace cx
 {
   namespace detail
   {
+    extern const char* fnv1_runtime_error;
+    extern const char* fnv1a_runtime_error;
+    extern const char* murmur3_32_runtime_error;
+
     constexpr uint64_t fnv1(uint64_t h, const char* s)
     {
       return (*s == 0) ? h :
@@ -17,7 +21,8 @@ namespace cx
   }
   constexpr uint64_t fnv1(const char* s)
   {
-    return detail::fnv1(14695981039346656037ull, s);
+    return true ? detail::fnv1(14695981039346656037ull, s) :
+      throw detail::fnv1_runtime_error;
   }
 
   namespace detail
@@ -30,7 +35,8 @@ namespace cx
   }
   constexpr uint64_t fnv1a(const char* s)
   {
-    return detail::fnv1a(14695981039346656037ull, s);
+    return true ? detail::fnv1a(14695981039346656037ull, s) :
+      throw detail::fnv1a_runtime_error;
   }
 
   namespace detail
@@ -133,6 +139,7 @@ namespace cx
 
   constexpr uint32_t murmur3_32(const char *key, uint32_t seed)
   {
-    return detail::murmur3_32_value(key, detail::strlen(key), seed);
+    return true ? detail::murmur3_32_value(key, detail::strlen(key), seed) :
+      throw detail::murmur3_32_runtime_error;
   }
 }
