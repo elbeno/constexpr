@@ -579,13 +579,26 @@ namespace cx
 
   //----------------------------------------------------------------------------
   // inverse trig functions
+  namespace detail
+  {
+    template <typename T>
+    constexpr T asin_series(T x, T sum, int n, T t)
+    {
+      return feq(sum, sum + t*static_cast<T>(n)/(n+2)) ?
+        sum :
+        asin_series(x, sum + t*static_cast<T>(n)/(n+2), n+2,
+                    t*x*x*static_cast<T>(n)/(n+3));
+    }
+  }
   template <typename FloatingPoint>
   constexpr FloatingPoint asin(
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return x >= FloatingPoint{-1} && x <= FloatingPoint{1} ?
-      FloatingPoint{2} * atan(x / (FloatingPoint{1} + sqrt(FloatingPoint{1} - x*x))) :
+    return x == FloatingPoint{-1} ? detail::pi()/FloatingPoint{-2} :
+    x == FloatingPoint{1} ? detail::pi()/FloatingPoint{2} :
+    x > FloatingPoint{-1} && x < FloatingPoint{1} ?
+      detail::asin_series(x, x, 1, x*x*x/FloatingPoint{2}) :
       throw detail::asin_domain_error;
   }
   template <typename Integral>
@@ -602,8 +615,8 @@ namespace cx
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
     return x == FloatingPoint{-1} ? static_cast<FloatingPoint>(detail::pi()) :
-      x >= FloatingPoint{-1} && x <= FloatingPoint{1} ?
-      FloatingPoint{2} * atan(sqrt(FloatingPoint{1} - x*x) / (FloatingPoint{1} + x)) :
+      x == FloatingPoint{1} ? 0 :
+      x > FloatingPoint{-1} && x < FloatingPoint{1} ? detail::pi()/FloatingPoint{2} - asin(x) :
       throw detail::acos_domain_error;
   }
   template <typename Integral>

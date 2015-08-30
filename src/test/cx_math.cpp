@@ -79,7 +79,7 @@ void test_cx_math()
   static_assert(feq(0.0l, cx::sin(PIl)), "sin(PIl)");
 
   // pi/2 = 1.570796326794896619231
-  constexpr float PI2f = 1.57079633f;
+  constexpr float PI2f = 1.57079637f;
   constexpr double PI2 = 1.5707963267948966;
   constexpr long double PI2l = 1.5707963267948966192l;
 
@@ -151,18 +151,26 @@ void test_cx_math()
   //----------------------------------------------------------------------------
   // asin & acos
   // asin(1) = pi/2
-  // (1 ulp error for double, more for long double)
   static_assert(feq(PI2f, cx::asin(1.0f)), "asin(1.0f)");
-  static_assert(feq(1.5707963267948961, cx::asin(1.0)), "asin(1.0)");
-  static_assert(feq(1.5707963267948966196l, cx::asin(1.0l)), "asin(1.0l)");
-  static_assert(feq(1.5707963267948961, cx::asin(1)), "asin(1)");
+  static_assert(feq(PI2, cx::asin(1.0)), "asin(1.0)");
+  static_assert(feq(PI2l, cx::asin(1.0l)), "asin(1.0l)");
+  static_assert(feq(PI2, cx::asin(1)), "asin(1)");
+
+  // asin(0.5) = pi/6
+  // pi/6 = 0.523598775598298873077
+  constexpr float PI6f = 0.5235988f;
+  constexpr double PI6 = 0.52359877559829887;
+  constexpr long double PI6l = 0.523598775598298873077l;
+
+  static_assert(feq(PI6f, cx::asin(0.5f)), "asin(0.5f)");
+  static_assert(feq(PI6, cx::asin(0.5)), "asin(0.5)");
+  static_assert(feq(PI6l, cx::asin(0.5l)), "asin(0.5l)");
 
   // acos(0) = pi/2
-  // (1 ulp error for double, more for long double)
   static_assert(feq(PI2f, cx::acos(0.0f)), "acos(0.0f)");
-  static_assert(feq(1.5707963267948961, cx::acos(0.0)), "acos(0.0)");
-  static_assert(feq(1.5707963267948966196l, cx::acos(0.0l)), "acos(0.0l)");
-  static_assert(feq(1.5707963267948961, cx::acos(0)), "acos(0)");
+  static_assert(feq(PI2, cx::acos(0.0)), "acos(0.0)");
+  static_assert(feq(PI2l, cx::acos(0.0l)), "acos(0.0l)");
+  static_assert(feq(PI2, cx::acos(0)), "acos(0)");
 
   //----------------------------------------------------------------------------
   // floor and ceil
