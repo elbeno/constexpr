@@ -34,13 +34,17 @@ void test_cx_math()
 
   //----------------------------------------------------------------------------
   // sqrt
-  // square root of 2 = 1.414213562373095048802
+  // square root of 2 =  1.414213562373095048802
+  constexpr float rt2f = 1.4142136f;
+  constexpr double rt2 = 1.41421356237309505;
+  constexpr long double rt2l = 1.4142135623730950488l;
+
   static_assert(feq(1.0f, cx::sqrt(1.0f)), "sqrt(1.0f)");
-  static_assert(feq(1.4142136f, cx::sqrt(2.0f)), "sqrt(2.0f)");
+  static_assert(feq(rt2f, cx::sqrt(2.0f)), "sqrt(2.0f)");
   static_assert(feq(1.0, cx::sqrt(1.0)), "sqrt(1.0)");
-  static_assert(feq(1.414213562373095, cx::sqrt(2.0)), "sqrt(2.0)");
+  static_assert(feq(rt2, cx::sqrt(2.0)), "sqrt(2.0)");
   static_assert(feq(1.0l, cx::sqrt(1.0l)), "sqrt(1.0l)");
-  static_assert(feq(1.4142135623730950488l, cx::sqrt(2.0l)), "sqrt(2.0l)");
+  static_assert(feq(rt2l, cx::sqrt(2.0l)), "sqrt(2.0l)");
   static_assert(feq(2.0, cx::sqrt(4)), "sqrt(4)");
 
   //----------------------------------------------------------------------------
@@ -126,20 +130,20 @@ void test_cx_math()
   // (1 ulp error for long double)
   static_assert(feq(PI4f, cx::atan(1.0f)), "atan(1.0f)");
   static_assert(feq(PI4, cx::atan(1.0)), "atan(1.0)");
-  static_assert(feq(0.7853981633974483097l, cx::atan(1.0l)), "atan(1.0l)");
+  static_assert(feq(0.78539816339744830966l, cx::atan(1.0l)), "atan(1.0l)");
   static_assert(feq(PI4, cx::atan(1)), "atan(1)");
 
   // arctan(pi/4) = 0.6657737500283538635905
   // (1 ulp error for long double)
   static_assert(feq(0.66577375f, cx::atan(PI4f)), "atan(PI/4f)");
   static_assert(feq(0.665773750028354, cx::atan(PI4)), "atan(PI/4)");
-  static_assert(feq(0.6657737500283538634l, cx::atan(PI4l)), "atan(PI/4l)");
+  static_assert(feq(0.6657737500283538635l, cx::atan(PI4l)), "atan(PI/4l)");
 
   // arctan(2) = 1.1071487177940905030171
   // (1 ulp error for long double)
   static_assert(feq(1.1071487f, cx::atan(2.0f)), "atan(2.0f)");
   static_assert(feq(1.10714871779409, cx::atan(2.0)), "atan(2.0)");
-  static_assert(feq(1.1071487177940905026l, cx::atan(2.0l)), "atan(2.0l)");
+  static_assert(feq(1.1071487177940905028l, cx::atan(2.0l)), "atan(2.0l)");
 
   // atan(1,1) = pi/4
   static_assert(feq(PI4, cx::atan2(1.0, 1.0)), "atan2(1.0, 1.0)");
@@ -159,8 +163,8 @@ void test_cx_math()
   // asin(0.5) = pi/6
   // pi/6 = 0.523598775598298873077
   constexpr float PI6f = 0.5235988f;
-  constexpr double PI6 = 0.52359877559829887;
-  constexpr long double PI6l = 0.523598775598298873077l;
+  constexpr double PI6 = 0.523598775598299;
+  constexpr long double PI6l = 0.523598775598298873l;
 
   static_assert(feq(PI6f, cx::asin(0.5f)), "asin(0.5f)");
   static_assert(feq(PI6, cx::asin(0.5)), "asin(0.5)");
@@ -326,7 +330,7 @@ void test_cx_math()
   // tanh(pi/4) = 0.655794202632672435653
   static_assert(feq(0.6557942f, cx::tanh(PI4f)), "tanh(0.0f)");
   static_assert(feq(0.6557942026326724, cx::tanh(PI4)), "tanh(0.0)");
-  static_assert(feq(0.6557942026326724356l, cx::tanh(PI4l)), "tanh(0.0l)");
+  static_assert(feq(0.65579420263267243565l, cx::tanh(PI4l)), "tanh(0.0l)");
 
   //----------------------------------------------------------------------------
   // asinh, acosh, atanh
@@ -355,8 +359,7 @@ void test_cx_math()
   static_assert(feq(0.111111f, cx::pow(3.0f, -2)), "pow(3.0f, -2)");
   static_assert(feq(1024.0, cx::pow(2, 10)), "pow(2, 10)");
   static_assert(feq(-0.125, cx::pow(-2, -3)), "pow(-2, -3)");
-  // square root of 2 = 1.414213562373095048802
-  static_assert(feq(1.4142136f, cx::pow(2.0f, 0.5f)), "pow(2.0f, 0.5f)");
-  static_assert(feq(1.4142135623730953, cx::pow(2.0, 0.5)), "pow(2.0, 0.5)");
-  static_assert(feq(1.4142135623730950488l, cx::pow(2.0l, 0.5l)), "pow(2.0l, 0.5l)");
+  static_assert(feq(rt2f, cx::pow(2.0f, 0.5f)), "pow(2.0f, 0.5f)");
+  static_assert(feq(rt2, cx::pow(2.0, 0.5)), "pow(2.0, 0.5)");
+  static_assert(feq(rt2l, cx::pow(2.0l, 0.5l)), "pow(2.0l, 0.5l)");
 }
