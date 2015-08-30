@@ -362,4 +362,12 @@ void test_cx_math()
   static_assert(feq(rt2f, cx::pow(2.0f, 0.5f)), "pow(2.0f, 0.5f)");
   static_assert(feq(rt2, cx::pow(2.0, 0.5)), "pow(2.0, 0.5)");
   static_assert(feq(rt2l, cx::pow(2.0l, 0.5l)), "pow(2.0l, 0.5l)");
+
+  //----------------------------------------------------------------------------
+  // erf
+  // erf(1) = 0.84270079294971486934122
+  static_assert(feq(0.8427007f, cx::erf(1.0f)), "erf(1.0f)");
+  static_assert(feq(0.842700792949715, cx::erf(1.0)), "erf(1.0)");
+  static_assert(feq(0.8427007929497148693l, cx::erf(1.0l)), "erf(1.0l)");
+  static_assert(feq(0.842700792949715, cx::erf(1)), "erf(1)");
 }

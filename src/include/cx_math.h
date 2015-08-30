@@ -213,6 +213,14 @@
 // long double pow(long double x, long double y);
 // Promoted pow(Arithmetic1 x, Arithmetic2 y);
 
+// -----------------------------------------------------------------------------
+// Gauss error function
+
+// float erf(float x);
+// double erf(double x);
+// long double erf(long double x);
+// double erf(Integral x);
+
 namespace cx
 {
   namespace detail
@@ -241,6 +249,7 @@ namespace cx
     extern const char* acosh_domain_error;
     extern const char* atanh_domain_error;
     extern const char* pow_runtime_error;
+    extern const char* erf_runtime_error;
   }
 
   //----------------------------------------------------------------------------
@@ -1188,5 +1197,39 @@ namespace cx
   {
     return true ? detail::ipow(static_cast<double>(x), y) :
       throw detail::pow_runtime_error;
+  }
+
+  //----------------------------------------------------------------------------
+  // erf: the error function
+  namespace detail
+  {
+    constexpr long double two_over_root_pi()
+    {
+      return 1.128379167095512573896l;
+    }
+
+    template <typename T>
+    constexpr T erf(T x, T sum, T n, int i, int s, T t)
+    {
+      return feq(sum, sum + (t*s/n)/(2*i+1)) ?
+        sum :
+        erf(x, sum + (t*s/n)/(2*i+1), n*(i+1), i+1, -s, t*x*x);
+    }
+  }
+  template <typename FloatingPoint>
+  constexpr FloatingPoint erf(
+      FloatingPoint x,
+      typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
+  {
+    return true ? detail::erf(x, x, FloatingPoint{1}, 1, -1, x*x*x)
+      * detail::two_over_root_pi() :
+      throw detail::erf_runtime_error;
+  }
+  template <typename Integral>
+  constexpr double erf(
+      Integral x,
+      typename std::enable_if<std::is_integral<Integral>::value>::type* = nullptr)
+  {
+    return erf<double>(x);
   }
 }
