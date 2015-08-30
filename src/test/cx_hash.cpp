@@ -1,4 +1,5 @@
-#include <cx_hash.h>
+#include <cx_fnv1.h>
+#include <cx_murmur3.h>
 
 void test_cx_hash()
 {
