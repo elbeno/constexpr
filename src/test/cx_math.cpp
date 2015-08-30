@@ -83,7 +83,7 @@ void test_cx_math()
   static_assert(feq(0.0l, cx::sin(PIl)), "sin(PIl)");
 
   // pi/2 = 1.570796326794896619231
-  constexpr float PI2f = 1.57079637f;
+  constexpr float PI2f = 1.57079633f;
   constexpr double PI2 = 1.5707963267948966;
   constexpr long double PI2l = 1.5707963267948966192l;
 
