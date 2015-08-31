@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cx_utils.h"
+
 #include <cstdint>
 
 //----------------------------------------------------------------------------
@@ -12,19 +14,6 @@ namespace cx
     namespace murmur
     {
       extern const char* murmur3_32_runtime_error;
-
-      constexpr int strlen(const char* s)
-      {
-        return *s == 0 ? 0 : 1 + strlen(s+1);
-      }
-
-      constexpr uint32_t word32le(const char* s)
-      {
-        return static_cast<uint32_t>(s[0])
-          + (static_cast<uint32_t>(s[1]) << 8)
-          + (static_cast<uint32_t>(s[2]) << 16)
-          + (static_cast<uint32_t>(s[3]) << 24);
-      }
 
       constexpr uint32_t murmur3_32_k(uint32_t k)
       {
@@ -113,7 +102,7 @@ namespace cx
   constexpr uint32_t murmur3_32(const char *key, uint32_t seed)
   {
     return true ?
-      detail::murmur::murmur3_32_value(key, detail::murmur::strlen(key), seed) :
+      detail::murmur::murmur3_32_value(key, strlen(key), seed) :
       throw detail::murmur::murmur3_32_runtime_error;
   }
 }
