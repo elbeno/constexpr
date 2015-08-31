@@ -2,9 +2,6 @@
 #include <cx_md5.h>
 #include <cx_murmur3.h>
 
-#include <iostream>
-using namespace std;
-
 constexpr uint64_t endianswap(uint64_t x)
 {
   return ((x & 0xff) << 56)
