@@ -70,11 +70,11 @@ namespace cx
       };
 
       // context utility functions: add, convert to sum
-      constexpr context ctxadd(context c1, context c2)
+      constexpr context ctxadd(const context& c1, const context& c2)
       {
         return { c1.a + c2.a, c1.b + c2.b, c1.c + c2.c, c1.d + c2.d, {0} };
       }
-      constexpr md5sum ctx2sum(context ctx)
+      constexpr md5sum ctx2sum(const context& ctx)
       {
         return
         {
@@ -131,7 +131,7 @@ namespace cx
         return { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, {0} };
       }
       // context from an existing context + buffer
-      constexpr context init(context ctx, const char* buf)
+      constexpr context init(const context& ctx, const char* buf)
       {
         return { ctx.a, ctx.b, ctx.c, ctx.d,
           { word32le(buf), word32le(buf+4), word32le(buf+8), word32le(buf+12),
@@ -159,7 +159,7 @@ namespace cx
           (static_cast<uint64_t>(origlen) >> 29) :
           0;
       }
-      constexpr context leftover(context ctx, const char* buf,
+      constexpr context leftover(const context& ctx, const char* buf,
                                  int len, int origlen, int origlenpos)
       {
         return { ctx.a, ctx.b, ctx.c, ctx.d,
@@ -197,28 +197,28 @@ namespace cx
       }
 
       // compute a step of each round
-      constexpr context round1step(context ctx, const uint32_t* block, int step)
+      constexpr context round1step(const context& ctx, const uint32_t* block, int step)
       {
         return {
           FF(ctx.a, ctx.b, ctx.c, ctx.d, block[step], r1shift[step&3], r1const[step]),
             ctx.b, ctx.c, ctx.d, {0}
         };
       }
-      constexpr context round2step(context ctx, const uint32_t* block, int step)
+      constexpr context round2step(const context& ctx, const uint32_t* block, int step)
       {
         return {
           GG(ctx.a, ctx.b, ctx.c, ctx.d, block[(1+step*5)%16], r2shift[step&3], r2const[step]),
             ctx.b, ctx.c, ctx.d, {0}
         };
       }
-      constexpr context round3step(context ctx, const uint32_t* block, int step)
+      constexpr context round3step(const context& ctx, const uint32_t* block, int step)
       {
         return {
           HH(ctx.a, ctx.b, ctx.c, ctx.d, block[(5+step*3)%16], r3shift[step&3], r3const[step]),
             ctx.b, ctx.c, ctx.d, {0}
         };
       }
-      constexpr context round4step(context ctx, const uint32_t* block, int step)
+      constexpr context round4step(const context& ctx, const uint32_t* block, int step)
       {
         return {
           II(ctx.a, ctx.b, ctx.c, ctx.d, block[(step*7)%16], r4shift[step&3], r4const[step]),
@@ -227,12 +227,12 @@ namespace cx
       }
 
       // rotate contexts right and left (each round step does this)
-      constexpr context rotateCR(context ctx, int n)
+      constexpr context rotateCR(const context& ctx, int n)
       {
         return n == 0 ? ctx :
           rotateCR({ ctx.d, ctx.a, ctx.b, ctx.c, {0} }, n-1);
       }
-      constexpr context rotateCL(context ctx, int n)
+      constexpr context rotateCL(const context& ctx, int n)
       {
         return n == 0 ? ctx :
           rotateCL({ ctx.b, ctx.c, ctx.d, ctx.a, {0} }, n-1);
@@ -240,29 +240,29 @@ namespace cx
 
       // the 4 rounds are each the result of recursively running the respective
       // round step (16 times for a block of 64 bytes)
-      constexpr context round1(context ctx, const uint32_t* msg, int n)
+      constexpr context round1(const context& ctx, const uint32_t* msg, int n)
       {
         return n == 0 ? round1step(ctx, msg, n) :
           rotateCL(round1step(rotateCR(round1(ctx, msg, n-1), n), msg, n), n);
       }
-      constexpr context round2(context ctx, const uint32_t* msg, int n)
+      constexpr context round2(const context& ctx, const uint32_t* msg, int n)
       {
         return n == 0 ? round2step(ctx, msg, n) :
           rotateCL(round2step(rotateCR(round2(ctx, msg, n-1), n), msg, n), n);
       }
-      constexpr context round3(context ctx, const uint32_t* msg, int n)
+      constexpr context round3(const context& ctx, const uint32_t* msg, int n)
       {
         return n == 0 ? round3step(ctx, msg, n) :
           rotateCL(round3step(rotateCR(round3(ctx, msg, n-1), n), msg, n), n);
       }
-      constexpr context round4(context ctx, const uint32_t* msg, int n)
+      constexpr context round4(const context& ctx, const uint32_t* msg, int n)
       {
         return n == 0 ? round4step(ctx, msg, n) :
           rotateCL(round4step(rotateCR(round4(ctx, msg, n-1), n), msg, n), n);
       }
 
       // the complete transform, for a message that is a multiple of 64 bytes
-      constexpr context md5transform(context ctx)
+      constexpr context md5transform(const context& ctx)
       {
         return ctxadd(ctx,
                       round4(
@@ -279,7 +279,8 @@ namespace cx
       // 2. when we have 56 bytes or more, we need to do a whole empty block to
       //    fit the 8 bytes of length after padding
       // 3. otherwise we have a block that will fit both padding and the length
-      constexpr context md5update(context ctx, const char* msg, int len, int origlen)
+      constexpr context md5update(const context& ctx, const char* msg,
+                                  int len, int origlen)
       {
         return
           len >= 64 ?
@@ -288,10 +289,13 @@ namespace cx
           md5update(md5transform(leftover(ctx, msg, len, origlen, 100)), msg+len, -100, origlen) :
           md5transform(leftover(ctx, msg, len, origlen, 56));
       }
-
+      constexpr md5sum md5withlen(const char* msg, int len)
+      {
+        return ctx2sum(md5update(init(), msg, len, len));
+      }
       constexpr md5sum md5(const char* msg)
       {
-        return ctx2sum(md5update(init(), msg, strlen(msg), strlen(msg)));
+        return md5withlen(msg, strlen(msg));
       }
     }
   }
