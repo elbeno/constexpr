@@ -2,18 +2,6 @@
 #include <cx_md5.h>
 #include <cx_murmur3.h>
 
-constexpr uint64_t endianswap(uint64_t x)
-{
-  return ((x & 0xff) << 56)
-    | (((x >> 8) & 0xff) << 48)
-    | (((x >> 16) & 0xff) << 40)
-    | (((x >> 24) & 0xff) << 32)
-    | (((x >> 32) & 0xff) << 24)
-    | (((x >> 40) & 0xff) << 16)
-    | (((x >> 48) & 0xff) << 8)
-    | ((x >> 56) & 0xff);
-}
-
 void test_cx_hash()
 {
   //----------------------------------------------------------------------------
@@ -62,35 +50,35 @@ void test_cx_hash()
     { 0xe4d7f1b4ed2e42d1, 0x5898f4b27b019da4 }
   };
 
-  static_assert(endianswap(cx::md5(md5tests[0]).low)  == md5sums[0].low &&
-                endianswap(cx::md5(md5tests[0]).high) == md5sums[0].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[0]).low)  == md5sums[0].low &&
+                cx::endianswap(cx::md5(md5tests[0]).high) == md5sums[0].high,
                 "md5(\"\")");
-  static_assert(endianswap(cx::md5(md5tests[1]).low)  == md5sums[1].low &&
-                endianswap(cx::md5(md5tests[1]).high) == md5sums[1].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[1]).low)  == md5sums[1].low &&
+                cx::endianswap(cx::md5(md5tests[1]).high) == md5sums[1].high,
                 "md5(\"a\")");
-  static_assert(endianswap(cx::md5(md5tests[2]).low)  == md5sums[2].low &&
-                endianswap(cx::md5(md5tests[2]).high) == md5sums[2].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[2]).low)  == md5sums[2].low &&
+                cx::endianswap(cx::md5(md5tests[2]).high) == md5sums[2].high,
                 "md5(\"abc\")");
-  static_assert(endianswap(cx::md5(md5tests[3]).low)  == md5sums[3].low &&
-                endianswap(cx::md5(md5tests[3]).high) == md5sums[3].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[3]).low)  == md5sums[3].low &&
+                cx::endianswap(cx::md5(md5tests[3]).high) == md5sums[3].high,
                 "md5(\"message digest\")");
-  static_assert(endianswap(cx::md5(md5tests[4]).low)  == md5sums[4].low &&
-                endianswap(cx::md5(md5tests[4]).high) == md5sums[4].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[4]).low)  == md5sums[4].low &&
+                cx::endianswap(cx::md5(md5tests[4]).high) == md5sums[4].high,
                 "md5(\"abcdefghijklmnopqrstuvwxyz\")");
-  static_assert(endianswap(cx::md5(md5tests[5]).low)  == md5sums[5].low &&
-                endianswap(cx::md5(md5tests[5]).high) == md5sums[5].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[5]).low)  == md5sums[5].low &&
+                cx::endianswap(cx::md5(md5tests[5]).high) == md5sums[5].high,
                 "md5(\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\")");
-  static_assert(endianswap(cx::md5(md5tests[6]).low)  == md5sums[6].low &&
-                endianswap(cx::md5(md5tests[6]).high) == md5sums[6].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[6]).low)  == md5sums[6].low &&
+                cx::endianswap(cx::md5(md5tests[6]).high) == md5sums[6].high,
                 "md5(\"12345678901234567890123456789012345678901234567890123456789012345678901234567890\")");
-  static_assert(endianswap(cx::md5(md5tests[7]).low)  == md5sums[7].low &&
-                endianswap(cx::md5(md5tests[7]).high) == md5sums[7].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[7]).low)  == md5sums[7].low &&
+                cx::endianswap(cx::md5(md5tests[7]).high) == md5sums[7].high,
                 "md5(\"hello, world\")");
 
   constexpr auto silly = cx::md5(
 #include <helloworld>
   );
-  static_assert(endianswap(silly.low)  == md5sums[7].low &&
-                endianswap(silly.high) == md5sums[7].high,
+  static_assert(cx::endianswap(silly.low)  == md5sums[7].low &&
+                cx::endianswap(silly.high) == md5sums[7].high,
                 "md5(#include<helloworld>)");
 }
