@@ -52,6 +52,21 @@ namespace cx
     return word32le(s, 4);
   }
 
+  // convert char* buffer (fragment) to uint32_t (big-endian)
+  constexpr uint32_t word32be(const char* s, int len)
+  {
+    return
+      (len > 0 ? (static_cast<uint32_t>(s[0]) << 24) : 0)
+      + (len > 1 ? (static_cast<uint32_t>(s[1]) << 16) : 0)
+      + (len > 2 ? (static_cast<uint32_t>(s[2]) << 8) : 0)
+      + (len > 3 ? static_cast<uint32_t>(s[3]) : 0);
+  }
+  // convert char* buffer (complete) to uint32_t (big-endian)
+  constexpr uint32_t word32be(const char* s)
+  {
+    return word32be(s, 4);
+  }
+
   // swap endianness of various size integral types
   constexpr uint64_t endianswap(uint64_t x)
   {
