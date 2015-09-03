@@ -58,29 +58,17 @@ namespace cx
         0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
       };
 
-      // a context will keep the running value for the md5sum
-      struct context
-      {
-        uint32_t a;
-        uint32_t b;
-        uint32_t c;
-        uint32_t d;
-      };
-
       // a schedule is the chunk of buffer to work on
       struct schedule
       {
         uint32_t w[16];
       };
 
-      // context utility functions: add, convert to sum
-      constexpr context ctxadd(const context& c1, const context& c2)
+      // add two md5sums
+      constexpr md5sum sumadd(const md5sum& s1, const md5sum& s2)
       {
-        return { c1.a + c2.a, c1.b + c2.b, c1.c + c2.c, c1.d + c2.d };
-      }
-      constexpr md5sum ctx2sum(const context& ctx)
-      {
-        return { { ctx.a, ctx.b, ctx.c, ctx.d } };
+        return { { s1.h[0] + s2.h[0], s1.h[1] + s2.h[1],
+              s1.h[2] + s2.h[2], s1.h[3] + s2.h[3] } };
       }
 
       // the basic MD5 operations
@@ -125,10 +113,10 @@ namespace cx
         return rotateL(a + I(b,c,d) + x + ac, s) + b;
       }
 
-      // initial context
-      constexpr context init()
+      // initial md5sum
+      constexpr md5sum init()
       {
-        return { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
+        return { { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 } };
       }
       // schedule from an existing buffer
       constexpr schedule init(const char* buf)
@@ -195,76 +183,80 @@ namespace cx
       }
 
       // compute a step of each round
-      constexpr context round1step(const context& ctx, const uint32_t* block, int step)
+      constexpr md5sum round1step(const md5sum& sum, const uint32_t* block, int step)
       {
-        return {
-          FF(ctx.a, ctx.b, ctx.c, ctx.d, block[step], r1shift[step&3], r1const[step]),
-            ctx.b, ctx.c, ctx.d
-            };
+        return { {
+            FF(sum.h[0], sum.h[1], sum.h[2], sum.h[3],
+               block[step], r1shift[step&3], r1const[step]),
+              sum.h[1], sum.h[2], sum.h[3]
+              } };
       }
-      constexpr context round2step(const context& ctx, const uint32_t* block, int step)
+      constexpr md5sum round2step(const md5sum& sum, const uint32_t* block, int step)
       {
-        return {
-          GG(ctx.a, ctx.b, ctx.c, ctx.d, block[(1+step*5)%16], r2shift[step&3], r2const[step]),
-            ctx.b, ctx.c, ctx.d
-            };
+        return { {
+            GG(sum.h[0], sum.h[1], sum.h[2], sum.h[3],
+               block[(1+step*5)%16], r2shift[step&3], r2const[step]),
+              sum.h[1], sum.h[2], sum.h[3]
+              } };
       }
-      constexpr context round3step(const context& ctx, const uint32_t* block, int step)
+      constexpr md5sum round3step(const md5sum& sum, const uint32_t* block, int step)
       {
-        return {
-          HH(ctx.a, ctx.b, ctx.c, ctx.d, block[(5+step*3)%16], r3shift[step&3], r3const[step]),
-            ctx.b, ctx.c, ctx.d
-        };
+        return { {
+            HH(sum.h[0], sum.h[1], sum.h[2], sum.h[3],
+               block[(5+step*3)%16], r3shift[step&3], r3const[step]),
+              sum.h[1], sum.h[2], sum.h[3]
+              } };
       }
-      constexpr context round4step(const context& ctx, const uint32_t* block, int step)
+      constexpr md5sum round4step(const md5sum& sum, const uint32_t* block, int step)
       {
-        return {
-          II(ctx.a, ctx.b, ctx.c, ctx.d, block[(step*7)%16], r4shift[step&3], r4const[step]),
-            ctx.b, ctx.c, ctx.d
-        };
+        return { {
+            II(sum.h[0], sum.h[1], sum.h[2], sum.h[3],
+               block[(step*7)%16], r4shift[step&3], r4const[step]),
+              sum.h[1], sum.h[2], sum.h[3]
+              } };
       }
 
-      // rotate contexts right and left (each round step does this)
-      constexpr context rotateCR(const context& ctx)
+      // rotate md5sums right and left (each round step does this)
+      constexpr md5sum rotateCR(const md5sum& sum)
       {
-        return { ctx.d, ctx.a, ctx.b, ctx.c };
+        return { { sum.h[3], sum.h[0], sum.h[1], sum.h[2] } };
       }
-      constexpr context rotateCL(const context& ctx)
+      constexpr md5sum rotateCL(const md5sum& sum)
       {
-        return { ctx.b, ctx.c, ctx.d, ctx.a };
+        return { { sum.h[1], sum.h[2], sum.h[3], sum.h[0] } };
       }
 
       // the 4 rounds are each the result of recursively running the respective
       // round step (16 times for a block of 64 bytes)
-      constexpr context round1(const context& ctx, const uint32_t* msg, int n)
+      constexpr md5sum round1(const md5sum& sum, const uint32_t* msg, int n)
       {
-        return n == 16 ? ctx :
-          rotateCL(round1(rotateCR(round1step(ctx, msg, n)), msg, n+1));
+        return n == 16 ? sum :
+          rotateCL(round1(rotateCR(round1step(sum, msg, n)), msg, n+1));
       }
-      constexpr context round2(const context& ctx, const uint32_t* msg, int n)
+      constexpr md5sum round2(const md5sum& sum, const uint32_t* msg, int n)
       {
-        return n == 16 ? ctx :
-          rotateCL(round2(rotateCR(round2step(ctx, msg, n)), msg, n+1));
+        return n == 16 ? sum :
+          rotateCL(round2(rotateCR(round2step(sum, msg, n)), msg, n+1));
       }
-      constexpr context round3(const context& ctx, const uint32_t* msg, int n)
+      constexpr md5sum round3(const md5sum& sum, const uint32_t* msg, int n)
       {
-        return n == 16 ? ctx :
-          rotateCL(round3(rotateCR(round3step(ctx, msg, n)), msg, n+1));
+        return n == 16 ? sum :
+          rotateCL(round3(rotateCR(round3step(sum, msg, n)), msg, n+1));
       }
-      constexpr context round4(const context& ctx, const uint32_t* msg, int n)
+      constexpr md5sum round4(const md5sum& sum, const uint32_t* msg, int n)
       {
-        return n == 16 ? ctx :
-          rotateCL(round4(rotateCR(round4step(ctx, msg, n)), msg, n+1));
+        return n == 16 ? sum :
+          rotateCL(round4(rotateCR(round4step(sum, msg, n)), msg, n+1));
       }
 
       // the complete transform, for a schedule block
-      constexpr context md5transform(const context& ctx, const schedule& s)
+      constexpr md5sum md5transform(const md5sum& sum, const schedule& s)
       {
-        return ctxadd(ctx,
+        return sumadd(sum,
                       round4(
                           round3(
                               round2(
-                                  round1(ctx, s.w, 0),
+                                  round1(sum, s.w, 0),
                                   s.w, 0),
                               s.w, 0),
                           s.w, 0));
@@ -275,19 +267,19 @@ namespace cx
       // 2. when we have 56 bytes or more, we need to do a whole empty block to
       //    fit the 8 bytes of length after padding
       // 3. otherwise we have a block that will fit both padding and the length
-      constexpr context md5update(const context& ctx, const char* msg,
+      constexpr md5sum md5update(const md5sum& sum, const char* msg,
                                   int len, int origlen)
       {
         return
           len >= 64 ?
-          md5update(md5transform(ctx, init(msg)), msg+64, len-64, origlen) :
+          md5update(md5transform(sum, init(msg)), msg+64, len-64, origlen) :
           len >= 56 ?
-          md5update(md5transform(ctx, leftover(msg, len, origlen, 100)), msg+len, -100, origlen) :
-          md5transform(ctx, leftover(msg, len, origlen, 56));
+          md5update(md5transform(sum, leftover(msg, len, origlen, 100)), msg+len, -100, origlen) :
+          md5transform(sum, leftover(msg, len, origlen, 56));
       }
       constexpr md5sum md5withlen(const char* msg, int len)
       {
-        return ctx2sum(md5update(init(), msg, len, len));
+        return md5update(init(), msg, len, len);
       }
       constexpr md5sum md5(const char* msg)
       {
