@@ -17,7 +17,7 @@ namespace cx
   {
     namespace sha256
     {
-      const char* sha256_runtime_error;
+      extern const char* sha256_runtime_error;
 
       // magic round constants (actually the fractional parts of
       // the cubes roots of the first 64 primes 2..311)
@@ -41,41 +41,25 @@ namespace cx
         0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
       };
 
-      // a context will keep the running value for the sha256sum
-      struct context
-      {
-        uint32_t a;
-        uint32_t b;
-        uint32_t c;
-        uint32_t d;
-        uint32_t e;
-        uint32_t f;
-        uint32_t g;
-        uint32_t h;
-      };
-
       // a schedule is the chunk of buffer to work on, extended to 64 words
       struct schedule
       {
         uint32_t w[64];
       };
 
-      // context utility functions: add, convert to sum
-      constexpr context ctxadd(const context& c1, const context& c2)
+      // sha256sum utility functions: add, convert to sum
+      constexpr sha256sum sumadd(const sha256sum& s1, const sha256sum& s2)
       {
-        return { c1.a + c2.a, c1.b + c2.b, c1.c + c2.c, c1.d + c2.d,
-            c1.e + c2.e, c1.f + c2.f, c1.g + c2.g, c1.h + c2.h };
+        return { { s1.h[0] + s2.h[0], s1.h[1] + s2.h[1],
+              s1.h[2] + s2.h[2], s1.h[3] + s2.h[3],
+              s1.h[4] + s2.h[4], s1.h[5] + s2.h[5],
+              s1.h[6] + s2.h[6], s1.h[7] + s2.h[7] } };
       }
-      constexpr sha256sum ctx2sum(const context& ctx)
+      // initial sha256sum
+      constexpr sha256sum init()
       {
-        return { { ctx.a, ctx.b, ctx.c, ctx.d, ctx.e, ctx.f, ctx.g, ctx.h } };
-      }
-
-      // initial context
-      constexpr context init()
-      {
-        return { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-            0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 };
+        return { { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+              0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 } };
       }
       // schedule from an existing buffer
       constexpr schedule init(const char* buf)
@@ -234,9 +218,9 @@ namespace cx
       {
         return (e & f) ^ (~e & g);
       }
-      constexpr uint32_t temp1(const context& ctx, int i)
+      constexpr uint32_t temp1(const sha256sum& sum, int i)
       {
-        return ctx.h + S1(ctx.e) + ch(ctx.e, ctx.f, ctx.g)
+        return sum.h[7] + S1(sum.h[4]) + ch(sum.h[4], sum.h[5], sum.h[6])
           + roundconst[i];
       }
       constexpr uint32_t S0(uint32_t a)
@@ -247,38 +231,41 @@ namespace cx
       {
         return (a & b) ^ (a & c) ^ (b & c);
       }
-      constexpr uint32_t temp2(const context& ctx)
+      constexpr uint32_t temp2(const sha256sum& sum)
       {
-        return S0(ctx.a) + maj(ctx.a, ctx.b, ctx.c);
+        return S0(sum.h[0]) + maj(sum.h[0], sum.h[1], sum.h[2]);
       }
 
-      // rotate contexts right and left (each round step does this)
-      constexpr context rotateCR(const context& ctx)
+      // rotate sha256sums right and left (each round step does this)
+      constexpr sha256sum rotateCR(const sha256sum& sum)
       {
-        return { ctx.h, ctx.a, ctx.b, ctx.c, ctx.d, ctx.e, ctx.f, ctx.g };
+        return { { sum.h[7], sum.h[0], sum.h[1], sum.h[2],
+              sum.h[3], sum.h[4], sum.h[5], sum.h[6] } };
       }
-      constexpr context rotateCL(const context& ctx)
+      constexpr sha256sum rotateCL(const sha256sum& sum)
       {
-        return { ctx.b, ctx.c, ctx.d, ctx.e, ctx.f, ctx.g, ctx.h, ctx.a };
+        return { { sum.h[1], sum.h[2], sum.h[3], sum.h[4],
+              sum.h[5], sum.h[6], sum.h[7], sum.h[0] } };
       }
 
-      constexpr context sha256round(const context& ctx, uint32_t t1, uint32_t t2)
+      constexpr sha256sum sha256round(const sha256sum& sum, uint32_t t1, uint32_t t2)
       {
-        return { ctx.a, ctx.b, ctx.c, ctx.d + t1, ctx.e, ctx.f, ctx.g, t1 + t2 };
+        return { { sum.h[0], sum.h[1], sum.h[2], sum.h[3] + t1,
+              sum.h[4], sum.h[5], sum.h[6], t1 + t2 } };
       }
-      constexpr context sha256compress(const context& ctx, const schedule& s, int step)
+      constexpr sha256sum sha256compress(const sha256sum& sum, const schedule& s, int step)
       {
-        return step == 64 ? ctx :
+        return step == 64 ? sum :
           rotateCL(
               sha256compress(
-                  rotateCR(sha256round(ctx, temp1(ctx, step) + s.w[step], temp2(ctx))),
+                  rotateCR(sha256round(sum, temp1(sum, step) + s.w[step], temp2(sum))),
                   s, step + 1));
       }
 
       // the complete transform, for a message that is a multiple of 64 bytes
-      constexpr context sha256transform(const context& ctx, const schedule& s)
+      constexpr sha256sum sha256transform(const sha256sum& sum, const schedule& s)
       {
-        return ctxadd(sha256compress(ctx, sha256extend(s), 0), ctx);
+        return sumadd(sha256compress(sum, sha256extend(s), 0), sum);
       }
 
       // three conditions:
@@ -286,20 +273,20 @@ namespace cx
       // 2. when we have 56 bytes or more, we need to do a whole empty block to
       //    fit the 8 bytes of length after padding
       // 3. otherwise we have a block that will fit both padding and the length
-      constexpr context sha256update(const context& ctx, const char* msg,
+      constexpr sha256sum sha256update(const sha256sum& sum, const char* msg,
                                      int len, int origlen)
       {
         return
           len >= 64 ?
-          sha256update(sha256transform(ctx, init(msg)), msg+64, len-64, origlen) :
+          sha256update(sha256transform(sum, init(msg)), msg+64, len-64, origlen) :
           len >= 56 ?
           sha256update(sha256transform(
-                           ctx, leftover(msg, len, origlen, 100)), msg+len, -100, origlen) :
-          sha256transform(ctx, leftover(msg, len, origlen, 56));
+                           sum, leftover(msg, len, origlen, 100)), msg+len, -100, origlen) :
+          sha256transform(sum, leftover(msg, len, origlen, 56));
       }
       constexpr sha256sum sha256withlen(const char* msg, int len)
       {
-        return ctx2sum(sha256update(init(), msg, len, len));
+        return sha256update(init(), msg, len, len);
       }
       constexpr sha256sum sha256(const char* msg)
       {
