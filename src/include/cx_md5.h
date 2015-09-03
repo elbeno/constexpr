@@ -8,8 +8,17 @@
 
 namespace cx
 {
-  // result of an md5 calculation - conventionally an md5 string is hex bytes
-  // from least significant to most significant
+  // Result of an md5 calculation - conventionally an md5 string is hex bytes
+  // from least significant to most significant. So to print out the md5sum:
+  //
+  // constexpr auto sum = cx::md5("abc");
+  // const uint8_t* m = reinterpret_cast<const uint8_t*>(c.h);
+  // cout << hex << setfill('0');
+  // for (size_t i = 0; i < sizeof(c.h); ++i)
+  // {
+  //   cout << setw(2) << +m[i];
+  // }
+
   struct md5sum
   {
     uint32_t h[4];

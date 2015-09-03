@@ -7,7 +7,16 @@
 
 namespace cx
 {
-  // result of a sha-256 calculation
+  // Result of a sha-256 calculation; to print it out:
+  //
+  // constexpr auto sum = cx::sha256("abc");
+  // const uint8_t* m = reinterpret_cast<const uint8_t*>(c.h);
+  // cout << hex << setfill('0');
+  // for (size_t i = 0; i < sizeof(c.h); ++i)
+  // {
+  //   cout << setw(2) << +m[i];
+  // }
+
   struct sha256sum
   {
     uint32_t h[8];
@@ -292,11 +301,21 @@ namespace cx
       {
         return sha256withlen(msg, strlen(msg));
       }
+      // convert a sha256sum to little-endian
+      constexpr sha256sum sha256tole(const sha256sum& sum)
+      {
+        return { {
+            endianswap(sum.h[0]), endianswap(sum.h[1]),
+              endianswap(sum.h[2]), endianswap(sum.h[3]),
+              endianswap(sum.h[4]), endianswap(sum.h[5]),
+              endianswap(sum.h[6]), endianswap(sum.h[7]),
+          } };
+      }
     }
   }
   constexpr sha256sum sha256(const char* s)
   {
-    return true ? detail::sha256::sha256(s) :
+    return true ? detail::sha256::sha256tole(detail::sha256::sha256(s)) :
       throw detail::sha256::sha256_runtime_error;
   }
 }

@@ -28,8 +28,7 @@ void test_cx_hash()
                 "murmur3(\"hello, world\")");
 
   //----------------------------------------------------------------------------
-  // MD5
-  constexpr const char* const md5tests[8] = {
+  constexpr const char* const testinputs[8] = {
     "",
     "a",
     "abc",
@@ -40,6 +39,8 @@ void test_cx_hash()
     "hello, world",
   };
 
+  //----------------------------------------------------------------------------
+  // MD5
   constexpr cx::md5sum md5sums[8] =  {
     { { 0xd41d8cd9, 0x8f00b204, 0xe9800998, 0xecf8427e } },
     { { 0x0cc175b9, 0xc0f1b6a8, 0x31c399e2, 0x69772661 } },
@@ -51,70 +52,49 @@ void test_cx_hash()
     { { 0xe4d7f1b4, 0xed2e42d1, 0x5898f4b2, 0x7b019da4 } }
   };
 
-  static_assert(cx::endianswap(cx::md5(md5tests[0]).h[0]) == md5sums[0].h[0] &&
-                cx::endianswap(cx::md5(md5tests[0]).h[1]) == md5sums[0].h[1] &&
-                cx::endianswap(cx::md5(md5tests[0]).h[2]) == md5sums[0].h[2] &&
-                cx::endianswap(cx::md5(md5tests[0]).h[3]) == md5sums[0].h[3],
+  static_assert(cx::endianswap(cx::md5(testinputs[0]).h[0]) == md5sums[0].h[0] &&
+                cx::endianswap(cx::md5(testinputs[0]).h[1]) == md5sums[0].h[1] &&
+                cx::endianswap(cx::md5(testinputs[0]).h[2]) == md5sums[0].h[2] &&
+                cx::endianswap(cx::md5(testinputs[0]).h[3]) == md5sums[0].h[3],
                 "md5(\"\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[1]).h[0]) == md5sums[1].h[0] &&
-                cx::endianswap(cx::md5(md5tests[1]).h[1]) == md5sums[1].h[1] &&
-                cx::endianswap(cx::md5(md5tests[1]).h[2]) == md5sums[1].h[2] &&
-                cx::endianswap(cx::md5(md5tests[1]).h[3]) == md5sums[1].h[3],
+  static_assert(cx::endianswap(cx::md5(testinputs[1]).h[0]) == md5sums[1].h[0] &&
+                cx::endianswap(cx::md5(testinputs[1]).h[1]) == md5sums[1].h[1] &&
+                cx::endianswap(cx::md5(testinputs[1]).h[2]) == md5sums[1].h[2] &&
+                cx::endianswap(cx::md5(testinputs[1]).h[3]) == md5sums[1].h[3],
                 "md5(\"a\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[2]).h[0]) == md5sums[2].h[0] &&
-                cx::endianswap(cx::md5(md5tests[2]).h[1]) == md5sums[2].h[1] &&
-                cx::endianswap(cx::md5(md5tests[2]).h[2]) == md5sums[2].h[2] &&
-                cx::endianswap(cx::md5(md5tests[2]).h[3]) == md5sums[2].h[3],
+  static_assert(cx::endianswap(cx::md5(testinputs[2]).h[0]) == md5sums[2].h[0] &&
+                cx::endianswap(cx::md5(testinputs[2]).h[1]) == md5sums[2].h[1] &&
+                cx::endianswap(cx::md5(testinputs[2]).h[2]) == md5sums[2].h[2] &&
+                cx::endianswap(cx::md5(testinputs[2]).h[3]) == md5sums[2].h[3],
                 "md5(\"abc\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[3]).h[0]) == md5sums[3].h[0] &&
-                cx::endianswap(cx::md5(md5tests[3]).h[1]) == md5sums[3].h[1] &&
-                cx::endianswap(cx::md5(md5tests[3]).h[2]) == md5sums[3].h[2] &&
-                cx::endianswap(cx::md5(md5tests[3]).h[3]) == md5sums[3].h[3],
+  static_assert(cx::endianswap(cx::md5(testinputs[3]).h[0]) == md5sums[3].h[0] &&
+                cx::endianswap(cx::md5(testinputs[3]).h[1]) == md5sums[3].h[1] &&
+                cx::endianswap(cx::md5(testinputs[3]).h[2]) == md5sums[3].h[2] &&
+                cx::endianswap(cx::md5(testinputs[3]).h[3]) == md5sums[3].h[3],
                 "md5(\"message digest\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[4]).h[0]) == md5sums[4].h[0] &&
-                cx::endianswap(cx::md5(md5tests[4]).h[1]) == md5sums[4].h[1] &&
-                cx::endianswap(cx::md5(md5tests[4]).h[2]) == md5sums[4].h[2] &&
-                cx::endianswap(cx::md5(md5tests[4]).h[3]) == md5sums[4].h[3],
+  static_assert(cx::endianswap(cx::md5(testinputs[4]).h[0]) == md5sums[4].h[0] &&
+                cx::endianswap(cx::md5(testinputs[4]).h[1]) == md5sums[4].h[1] &&
+                cx::endianswap(cx::md5(testinputs[4]).h[2]) == md5sums[4].h[2] &&
+                cx::endianswap(cx::md5(testinputs[4]).h[3]) == md5sums[4].h[3],
                 "md5(\"abcdefghijklmnopqrstuvwxyz\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[5]).h[0]) == md5sums[5].h[0] &&
-                cx::endianswap(cx::md5(md5tests[5]).h[1]) == md5sums[5].h[1] &&
-                cx::endianswap(cx::md5(md5tests[5]).h[2]) == md5sums[5].h[2] &&
-                cx::endianswap(cx::md5(md5tests[5]).h[3]) == md5sums[5].h[3],
+  static_assert(cx::endianswap(cx::md5(testinputs[5]).h[0]) == md5sums[5].h[0] &&
+                cx::endianswap(cx::md5(testinputs[5]).h[1]) == md5sums[5].h[1] &&
+                cx::endianswap(cx::md5(testinputs[5]).h[2]) == md5sums[5].h[2] &&
+                cx::endianswap(cx::md5(testinputs[5]).h[3]) == md5sums[5].h[3],
                 "md5(\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[6]).h[0]) == md5sums[6].h[0] &&
-                cx::endianswap(cx::md5(md5tests[6]).h[1]) == md5sums[6].h[1] &&
-                cx::endianswap(cx::md5(md5tests[6]).h[2]) == md5sums[6].h[2] &&
-                cx::endianswap(cx::md5(md5tests[6]).h[3]) == md5sums[6].h[3],
+  static_assert(cx::endianswap(cx::md5(testinputs[6]).h[0]) == md5sums[6].h[0] &&
+                cx::endianswap(cx::md5(testinputs[6]).h[1]) == md5sums[6].h[1] &&
+                cx::endianswap(cx::md5(testinputs[6]).h[2]) == md5sums[6].h[2] &&
+                cx::endianswap(cx::md5(testinputs[6]).h[3]) == md5sums[6].h[3],
                 "md5(\"12345678901234567890123456789012345678901234567890123456789012345678901234567890\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[7]).h[0]) == md5sums[7].h[0] &&
-                cx::endianswap(cx::md5(md5tests[7]).h[1]) == md5sums[7].h[1] &&
-                cx::endianswap(cx::md5(md5tests[7]).h[2]) == md5sums[7].h[2] &&
-                cx::endianswap(cx::md5(md5tests[7]).h[3]) == md5sums[7].h[3],
+  static_assert(cx::endianswap(cx::md5(testinputs[7]).h[0]) == md5sums[7].h[0] &&
+                cx::endianswap(cx::md5(testinputs[7]).h[1]) == md5sums[7].h[1] &&
+                cx::endianswap(cx::md5(testinputs[7]).h[2]) == md5sums[7].h[2] &&
+                cx::endianswap(cx::md5(testinputs[7]).h[3]) == md5sums[7].h[3],
                 "md5(\"hello, world\")");
-
-  constexpr auto silly = cx::md5(
-#include <helloworld>
-  );
-  static_assert(cx::endianswap(silly.h[0]) == md5sums[7].h[0] &&
-                cx::endianswap(silly.h[1]) == md5sums[7].h[1] &&
-                cx::endianswap(silly.h[2]) == md5sums[7].h[2] &&
-                cx::endianswap(silly.h[3]) == md5sums[7].h[3],
-                "md5(#include<helloworld>)");
 
   //----------------------------------------------------------------------------
   // SHA256
-
-  constexpr const char* const sha256tests[8] = {
-    "",
-    "a",
-    "abc",
-    "message digest",
-    "abcdefghijklmnopqrstuvwxyz",
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-    "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
-    "hello, world",
-  };
-
   constexpr cx::sha256sum sha256sums[8] =  {
     { { 0xe3b0c442, 0x98fc1c14, 0x9afbf4c8, 0x996fb924,
         0x27ae41e4, 0x649b934c, 0xa495991b, 0x7852b855 } },
@@ -134,76 +114,76 @@ void test_cx_hash()
         0x83644d07, 0xdfba7cbf, 0xbc4c8a2e, 0x08360d5b } }
   };
 
-  static_assert(cx::sha256(sha256tests[0]).h[0] == sha256sums[0].h[0] &&
-                cx::sha256(sha256tests[0]).h[1] == sha256sums[0].h[1] &&
-                cx::sha256(sha256tests[0]).h[2] == sha256sums[0].h[2] &&
-                cx::sha256(sha256tests[0]).h[3] == sha256sums[0].h[3] &&
-                cx::sha256(sha256tests[0]).h[4] == sha256sums[0].h[4] &&
-                cx::sha256(sha256tests[0]).h[5] == sha256sums[0].h[5] &&
-                cx::sha256(sha256tests[0]).h[6] == sha256sums[0].h[6] &&
-                cx::sha256(sha256tests[0]).h[7] == sha256sums[0].h[7],
+  static_assert(cx::endianswap(cx::sha256(testinputs[0]).h[0]) == sha256sums[0].h[0] &&
+                cx::endianswap(cx::sha256(testinputs[0]).h[1]) == sha256sums[0].h[1] &&
+                cx::endianswap(cx::sha256(testinputs[0]).h[2]) == sha256sums[0].h[2] &&
+                cx::endianswap(cx::sha256(testinputs[0]).h[3]) == sha256sums[0].h[3] &&
+                cx::endianswap(cx::sha256(testinputs[0]).h[4]) == sha256sums[0].h[4] &&
+                cx::endianswap(cx::sha256(testinputs[0]).h[5]) == sha256sums[0].h[5] &&
+                cx::endianswap(cx::sha256(testinputs[0]).h[6]) == sha256sums[0].h[6] &&
+                cx::endianswap(cx::sha256(testinputs[0]).h[7]) == sha256sums[0].h[7],
                 "sha256(\"\")");
-  static_assert(cx::sha256(sha256tests[1]).h[0] == sha256sums[1].h[0] &&
-                cx::sha256(sha256tests[1]).h[1] == sha256sums[1].h[1] &&
-                cx::sha256(sha256tests[1]).h[2] == sha256sums[1].h[2] &&
-                cx::sha256(sha256tests[1]).h[3] == sha256sums[1].h[3] &&
-                cx::sha256(sha256tests[1]).h[4] == sha256sums[1].h[4] &&
-                cx::sha256(sha256tests[1]).h[5] == sha256sums[1].h[5] &&
-                cx::sha256(sha256tests[1]).h[6] == sha256sums[1].h[6] &&
-                cx::sha256(sha256tests[1]).h[7] == sha256sums[1].h[7],
+  static_assert(cx::endianswap(cx::sha256(testinputs[1]).h[0]) == sha256sums[1].h[0] &&
+                cx::endianswap(cx::sha256(testinputs[1]).h[1]) == sha256sums[1].h[1] &&
+                cx::endianswap(cx::sha256(testinputs[1]).h[2]) == sha256sums[1].h[2] &&
+                cx::endianswap(cx::sha256(testinputs[1]).h[3]) == sha256sums[1].h[3] &&
+                cx::endianswap(cx::sha256(testinputs[1]).h[4]) == sha256sums[1].h[4] &&
+                cx::endianswap(cx::sha256(testinputs[1]).h[5]) == sha256sums[1].h[5] &&
+                cx::endianswap(cx::sha256(testinputs[1]).h[6]) == sha256sums[1].h[6] &&
+                cx::endianswap(cx::sha256(testinputs[1]).h[7]) == sha256sums[1].h[7],
                 "sha256(\"a\")");
-  static_assert(cx::sha256(sha256tests[2]).h[0] == sha256sums[2].h[0] &&
-                cx::sha256(sha256tests[2]).h[1] == sha256sums[2].h[1] &&
-                cx::sha256(sha256tests[2]).h[2] == sha256sums[2].h[2] &&
-                cx::sha256(sha256tests[2]).h[3] == sha256sums[2].h[3] &&
-                cx::sha256(sha256tests[2]).h[4] == sha256sums[2].h[4] &&
-                cx::sha256(sha256tests[2]).h[5] == sha256sums[2].h[5] &&
-                cx::sha256(sha256tests[2]).h[6] == sha256sums[2].h[6] &&
-                cx::sha256(sha256tests[2]).h[7] == sha256sums[2].h[7],
+  static_assert(cx::endianswap(cx::sha256(testinputs[2]).h[0]) == sha256sums[2].h[0] &&
+                cx::endianswap(cx::sha256(testinputs[2]).h[1]) == sha256sums[2].h[1] &&
+                cx::endianswap(cx::sha256(testinputs[2]).h[2]) == sha256sums[2].h[2] &&
+                cx::endianswap(cx::sha256(testinputs[2]).h[3]) == sha256sums[2].h[3] &&
+                cx::endianswap(cx::sha256(testinputs[2]).h[4]) == sha256sums[2].h[4] &&
+                cx::endianswap(cx::sha256(testinputs[2]).h[5]) == sha256sums[2].h[5] &&
+                cx::endianswap(cx::sha256(testinputs[2]).h[6]) == sha256sums[2].h[6] &&
+                cx::endianswap(cx::sha256(testinputs[2]).h[7]) == sha256sums[2].h[7],
                 "sha256(\"abc\")");
-  static_assert(cx::sha256(sha256tests[3]).h[0] == sha256sums[3].h[0] &&
-                cx::sha256(sha256tests[3]).h[1] == sha256sums[3].h[1] &&
-                cx::sha256(sha256tests[3]).h[2] == sha256sums[3].h[2] &&
-                cx::sha256(sha256tests[3]).h[3] == sha256sums[3].h[3] &&
-                cx::sha256(sha256tests[3]).h[4] == sha256sums[3].h[4] &&
-                cx::sha256(sha256tests[3]).h[5] == sha256sums[3].h[5] &&
-                cx::sha256(sha256tests[3]).h[6] == sha256sums[3].h[6] &&
-                cx::sha256(sha256tests[3]).h[7] == sha256sums[3].h[7],
+  static_assert(cx::endianswap(cx::sha256(testinputs[3]).h[0]) == sha256sums[3].h[0] &&
+                cx::endianswap(cx::sha256(testinputs[3]).h[1]) == sha256sums[3].h[1] &&
+                cx::endianswap(cx::sha256(testinputs[3]).h[2]) == sha256sums[3].h[2] &&
+                cx::endianswap(cx::sha256(testinputs[3]).h[3]) == sha256sums[3].h[3] &&
+                cx::endianswap(cx::sha256(testinputs[3]).h[4]) == sha256sums[3].h[4] &&
+                cx::endianswap(cx::sha256(testinputs[3]).h[5]) == sha256sums[3].h[5] &&
+                cx::endianswap(cx::sha256(testinputs[3]).h[6]) == sha256sums[3].h[6] &&
+                cx::endianswap(cx::sha256(testinputs[3]).h[7]) == sha256sums[3].h[7],
                 "sha256(\"message digest\")");
-  static_assert(cx::sha256(sha256tests[4]).h[0] == sha256sums[4].h[0] &&
-                cx::sha256(sha256tests[4]).h[1] == sha256sums[4].h[1] &&
-                cx::sha256(sha256tests[4]).h[2] == sha256sums[4].h[2] &&
-                cx::sha256(sha256tests[4]).h[3] == sha256sums[4].h[3] &&
-                cx::sha256(sha256tests[4]).h[4] == sha256sums[4].h[4] &&
-                cx::sha256(sha256tests[4]).h[5] == sha256sums[4].h[5] &&
-                cx::sha256(sha256tests[4]).h[6] == sha256sums[4].h[6] &&
-                cx::sha256(sha256tests[4]).h[7] == sha256sums[4].h[7],
+  static_assert(cx::endianswap(cx::sha256(testinputs[4]).h[0]) == sha256sums[4].h[0] &&
+                cx::endianswap(cx::sha256(testinputs[4]).h[1]) == sha256sums[4].h[1] &&
+                cx::endianswap(cx::sha256(testinputs[4]).h[2]) == sha256sums[4].h[2] &&
+                cx::endianswap(cx::sha256(testinputs[4]).h[3]) == sha256sums[4].h[3] &&
+                cx::endianswap(cx::sha256(testinputs[4]).h[4]) == sha256sums[4].h[4] &&
+                cx::endianswap(cx::sha256(testinputs[4]).h[5]) == sha256sums[4].h[5] &&
+                cx::endianswap(cx::sha256(testinputs[4]).h[6]) == sha256sums[4].h[6] &&
+                cx::endianswap(cx::sha256(testinputs[4]).h[7]) == sha256sums[4].h[7],
                 "sha256(\"abcdefghijklmnopqrstuvwxyz\")");
-  static_assert(cx::sha256(sha256tests[5]).h[0] == sha256sums[5].h[0] &&
-                cx::sha256(sha256tests[5]).h[1] == sha256sums[5].h[1] &&
-                cx::sha256(sha256tests[5]).h[2] == sha256sums[5].h[2] &&
-                cx::sha256(sha256tests[5]).h[3] == sha256sums[5].h[3] &&
-                cx::sha256(sha256tests[5]).h[4] == sha256sums[5].h[4] &&
-                cx::sha256(sha256tests[5]).h[5] == sha256sums[5].h[5] &&
-                cx::sha256(sha256tests[5]).h[6] == sha256sums[5].h[6] &&
-                cx::sha256(sha256tests[5]).h[7] == sha256sums[5].h[7],
+  static_assert(cx::endianswap(cx::sha256(testinputs[5]).h[0]) == sha256sums[5].h[0] &&
+                cx::endianswap(cx::sha256(testinputs[5]).h[1]) == sha256sums[5].h[1] &&
+                cx::endianswap(cx::sha256(testinputs[5]).h[2]) == sha256sums[5].h[2] &&
+                cx::endianswap(cx::sha256(testinputs[5]).h[3]) == sha256sums[5].h[3] &&
+                cx::endianswap(cx::sha256(testinputs[5]).h[4]) == sha256sums[5].h[4] &&
+                cx::endianswap(cx::sha256(testinputs[5]).h[5]) == sha256sums[5].h[5] &&
+                cx::endianswap(cx::sha256(testinputs[5]).h[6]) == sha256sums[5].h[6] &&
+                cx::endianswap(cx::sha256(testinputs[5]).h[7]) == sha256sums[5].h[7],
                 "sha256(\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\")");
-  static_assert(cx::sha256(sha256tests[6]).h[0] == sha256sums[6].h[0] &&
-                cx::sha256(sha256tests[6]).h[1] == sha256sums[6].h[1] &&
-                cx::sha256(sha256tests[6]).h[2] == sha256sums[6].h[2] &&
-                cx::sha256(sha256tests[6]).h[3] == sha256sums[6].h[3] &&
-                cx::sha256(sha256tests[6]).h[4] == sha256sums[6].h[4] &&
-                cx::sha256(sha256tests[6]).h[5] == sha256sums[6].h[5] &&
-                cx::sha256(sha256tests[6]).h[6] == sha256sums[6].h[6] &&
-                cx::sha256(sha256tests[6]).h[7] == sha256sums[6].h[7],
+  static_assert(cx::endianswap(cx::sha256(testinputs[6]).h[0]) == sha256sums[6].h[0] &&
+                cx::endianswap(cx::sha256(testinputs[6]).h[1]) == sha256sums[6].h[1] &&
+                cx::endianswap(cx::sha256(testinputs[6]).h[2]) == sha256sums[6].h[2] &&
+                cx::endianswap(cx::sha256(testinputs[6]).h[3]) == sha256sums[6].h[3] &&
+                cx::endianswap(cx::sha256(testinputs[6]).h[4]) == sha256sums[6].h[4] &&
+                cx::endianswap(cx::sha256(testinputs[6]).h[5]) == sha256sums[6].h[5] &&
+                cx::endianswap(cx::sha256(testinputs[6]).h[6]) == sha256sums[6].h[6] &&
+                cx::endianswap(cx::sha256(testinputs[6]).h[7]) == sha256sums[6].h[7],
                 "sha256(\"12345678901234567890123456789012345678901234567890123456789012345678901234567890\")");
-  static_assert(cx::sha256(sha256tests[7]).h[0] == sha256sums[7].h[0] &&
-                cx::sha256(sha256tests[7]).h[1] == sha256sums[7].h[1] &&
-                cx::sha256(sha256tests[7]).h[2] == sha256sums[7].h[2] &&
-                cx::sha256(sha256tests[7]).h[3] == sha256sums[7].h[3] &&
-                cx::sha256(sha256tests[7]).h[4] == sha256sums[7].h[4] &&
-                cx::sha256(sha256tests[7]).h[5] == sha256sums[7].h[5] &&
-                cx::sha256(sha256tests[7]).h[6] == sha256sums[7].h[6] &&
-                cx::sha256(sha256tests[7]).h[7] == sha256sums[7].h[7],
+  static_assert(cx::endianswap(cx::sha256(testinputs[7]).h[0]) == sha256sums[7].h[0] &&
+                cx::endianswap(cx::sha256(testinputs[7]).h[1]) == sha256sums[7].h[1] &&
+                cx::endianswap(cx::sha256(testinputs[7]).h[2]) == sha256sums[7].h[2] &&
+                cx::endianswap(cx::sha256(testinputs[7]).h[3]) == sha256sums[7].h[3] &&
+                cx::endianswap(cx::sha256(testinputs[7]).h[4]) == sha256sums[7].h[4] &&
+                cx::endianswap(cx::sha256(testinputs[7]).h[5]) == sha256sums[7].h[5] &&
+                cx::endianswap(cx::sha256(testinputs[7]).h[6]) == sha256sums[7].h[6] &&
+                cx::endianswap(cx::sha256(testinputs[7]).h[7]) == sha256sums[7].h[7],
                 "sha256(\"hello, world\")");
 }
