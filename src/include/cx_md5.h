@@ -66,13 +66,18 @@ namespace cx
         uint32_t b;
         uint32_t c;
         uint32_t d;
-        uint32_t buf[16];
+      };
+
+      // a schedule is the chunk of buffer to work on
+      struct schedule
+      {
+        uint32_t w[16];
       };
 
       // context utility functions: add, convert to sum
       constexpr context ctxadd(const context& c1, const context& c2)
       {
-        return { c1.a + c2.a, c1.b + c2.b, c1.c + c2.c, c1.d + c2.d, {0} };
+        return { c1.a + c2.a, c1.b + c2.b, c1.c + c2.c, c1.d + c2.d };
       }
       constexpr md5sum ctx2sum(const context& ctx)
       {
@@ -128,16 +133,15 @@ namespace cx
       // initial context
       constexpr context init()
       {
-        return { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, {0} };
+        return { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
       }
-      // context from an existing context + buffer
-      constexpr context init(const context& ctx, const char* buf)
+      // schedule from an existing buffer
+      constexpr schedule init(const char* buf)
       {
-        return { ctx.a, ctx.b, ctx.c, ctx.d,
-          { word32le(buf), word32le(buf+4), word32le(buf+8), word32le(buf+12),
-            word32le(buf+16), word32le(buf+20), word32le(buf+24), word32le(buf+28),
-            word32le(buf+32), word32le(buf+36), word32le(buf+40), word32le(buf+44),
-            word32le(buf+48), word32le(buf+52), word32le(buf+56), word32le(buf+60) } };
+        return { { word32le(buf), word32le(buf+4), word32le(buf+8), word32le(buf+12),
+              word32le(buf+16), word32le(buf+20), word32le(buf+24), word32le(buf+28),
+              word32le(buf+32), word32le(buf+36), word32le(buf+40), word32le(buf+44),
+              word32le(buf+48), word32le(buf+52), word32le(buf+56), word32le(buf+60) } };
       }
 
       // computing leftovers is messy: we need to pad the empty space to a
@@ -159,41 +163,40 @@ namespace cx
           (static_cast<uint64_t>(origlen) >> 29) :
           0;
       }
-      constexpr context leftover(const context& ctx, const char* buf,
-                                 int len, int origlen, int origlenpos)
+      constexpr schedule leftover(const char* buf,
+                                  int len, int origlen, int origlenpos)
       {
-        return { ctx.a, ctx.b, ctx.c, ctx.d,
-          { word32le(buf, len) | pad(len) | origlenbytes(origlen, origlenpos),
-            word32le(len >= 4 ? buf+4 : buf, len-4)
-              | pad(len-4) | origlenbytes(origlen, origlenpos-4),
-            word32le(len >= 8 ? buf+8 : buf, len-8)
-              | pad(len-8) | origlenbytes(origlen, origlenpos-8),
-            word32le(len >= 12 ? buf+12 : buf, len-12)
-              | pad(len-12) | origlenbytes(origlen, origlenpos-12),
-            word32le(len >= 16 ? buf+16 : buf, len-16)
-              | pad(len-16) | origlenbytes(origlen, origlenpos-16),
-            word32le(len >= 20 ? buf+20 : buf, len-20)
-              | pad(len-20) | origlenbytes(origlen, origlenpos-20),
-            word32le(len >= 24 ? buf+24 : buf, len-24)
-              | pad(len-24) | origlenbytes(origlen, origlenpos-24),
-            word32le(len >= 28 ? buf+28 : buf, len-28)
-              | pad(len-28) | origlenbytes(origlen, origlenpos-28),
-            word32le(len >= 32 ? buf+32 : buf, len-32)
-              | pad(len-32) | origlenbytes(origlen, origlenpos-32),
-            word32le(len >= 36 ? buf+36 : buf, len-36)
-              | pad(len-36) | origlenbytes(origlen, origlenpos-36),
-            word32le(len >= 40 ? buf+40 : buf, len-40)
-              | pad(len-40) | origlenbytes(origlen, origlenpos-40),
-            word32le(len >= 44 ? buf+44 : buf, len-44)
-              | pad(len-44) | origlenbytes(origlen, origlenpos-44),
-            word32le(len >= 48 ? buf+48 : buf, len-48)
-              | pad(len-48) | origlenbytes(origlen, origlenpos-48),
-            word32le(len >= 52 ? buf+52 : buf, len-52)
-              | pad(len-52) | origlenbytes(origlen, origlenpos-52),
-            word32le(len >= 56 ? buf+56 : buf, len-56)
-              | pad(len-56) | origlenbytes(origlen, origlenpos-56),
-            word32le(len >= 60 ? buf+60 : buf, len-60)
-              | pad(len-60) | origlenbytes(origlen, origlenpos-60)} };
+        return { { word32le(buf, len) | pad(len) | origlenbytes(origlen, origlenpos),
+              word32le(len >= 4 ? buf+4 : buf, len-4)
+                | pad(len-4) | origlenbytes(origlen, origlenpos-4),
+              word32le(len >= 8 ? buf+8 : buf, len-8)
+                | pad(len-8) | origlenbytes(origlen, origlenpos-8),
+              word32le(len >= 12 ? buf+12 : buf, len-12)
+                | pad(len-12) | origlenbytes(origlen, origlenpos-12),
+              word32le(len >= 16 ? buf+16 : buf, len-16)
+                | pad(len-16) | origlenbytes(origlen, origlenpos-16),
+              word32le(len >= 20 ? buf+20 : buf, len-20)
+                | pad(len-20) | origlenbytes(origlen, origlenpos-20),
+              word32le(len >= 24 ? buf+24 : buf, len-24)
+                | pad(len-24) | origlenbytes(origlen, origlenpos-24),
+              word32le(len >= 28 ? buf+28 : buf, len-28)
+                | pad(len-28) | origlenbytes(origlen, origlenpos-28),
+              word32le(len >= 32 ? buf+32 : buf, len-32)
+                | pad(len-32) | origlenbytes(origlen, origlenpos-32),
+              word32le(len >= 36 ? buf+36 : buf, len-36)
+                | pad(len-36) | origlenbytes(origlen, origlenpos-36),
+              word32le(len >= 40 ? buf+40 : buf, len-40)
+                | pad(len-40) | origlenbytes(origlen, origlenpos-40),
+              word32le(len >= 44 ? buf+44 : buf, len-44)
+                | pad(len-44) | origlenbytes(origlen, origlenpos-44),
+              word32le(len >= 48 ? buf+48 : buf, len-48)
+                | pad(len-48) | origlenbytes(origlen, origlenpos-48),
+              word32le(len >= 52 ? buf+52 : buf, len-52)
+                | pad(len-52) | origlenbytes(origlen, origlenpos-52),
+              word32le(len >= 56 ? buf+56 : buf, len-56)
+                | pad(len-56) | origlenbytes(origlen, origlenpos-56),
+              word32le(len >= 60 ? buf+60 : buf, len-60)
+                | pad(len-60) | origlenbytes(origlen, origlenpos-60)} };
       }
 
       // compute a step of each round
@@ -201,77 +204,75 @@ namespace cx
       {
         return {
           FF(ctx.a, ctx.b, ctx.c, ctx.d, block[step], r1shift[step&3], r1const[step]),
-            ctx.b, ctx.c, ctx.d, {0}
-        };
+            ctx.b, ctx.c, ctx.d
+            };
       }
       constexpr context round2step(const context& ctx, const uint32_t* block, int step)
       {
         return {
           GG(ctx.a, ctx.b, ctx.c, ctx.d, block[(1+step*5)%16], r2shift[step&3], r2const[step]),
-            ctx.b, ctx.c, ctx.d, {0}
-        };
+            ctx.b, ctx.c, ctx.d
+            };
       }
       constexpr context round3step(const context& ctx, const uint32_t* block, int step)
       {
         return {
           HH(ctx.a, ctx.b, ctx.c, ctx.d, block[(5+step*3)%16], r3shift[step&3], r3const[step]),
-            ctx.b, ctx.c, ctx.d, {0}
+            ctx.b, ctx.c, ctx.d
         };
       }
       constexpr context round4step(const context& ctx, const uint32_t* block, int step)
       {
         return {
           II(ctx.a, ctx.b, ctx.c, ctx.d, block[(step*7)%16], r4shift[step&3], r4const[step]),
-            ctx.b, ctx.c, ctx.d, {0}
+            ctx.b, ctx.c, ctx.d
         };
       }
 
       // rotate contexts right and left (each round step does this)
-      constexpr context rotateCR(const context& ctx, int n)
+      constexpr context rotateCR(const context& ctx)
       {
-        return n == 0 ? ctx :
-          rotateCR({ ctx.d, ctx.a, ctx.b, ctx.c, {0} }, n-1);
+        return { ctx.d, ctx.a, ctx.b, ctx.c };
       }
-      constexpr context rotateCL(const context& ctx, int n)
+      constexpr context rotateCL(const context& ctx)
       {
-        return n == 0 ? ctx :
-          rotateCL({ ctx.b, ctx.c, ctx.d, ctx.a, {0} }, n-1);
+        return { ctx.b, ctx.c, ctx.d, ctx.a };
       }
 
       // the 4 rounds are each the result of recursively running the respective
       // round step (16 times for a block of 64 bytes)
       constexpr context round1(const context& ctx, const uint32_t* msg, int n)
       {
-        return n == 0 ? round1step(ctx, msg, n) :
-          rotateCL(round1step(rotateCR(round1(ctx, msg, n-1), n), msg, n), n);
+        return n == 16 ? ctx :
+          rotateCL(round1(rotateCR(round1step(ctx, msg, n)), msg, n+1));
       }
       constexpr context round2(const context& ctx, const uint32_t* msg, int n)
       {
-        return n == 0 ? round2step(ctx, msg, n) :
-          rotateCL(round2step(rotateCR(round2(ctx, msg, n-1), n), msg, n), n);
+        return n == 16 ? ctx :
+          rotateCL(round2(rotateCR(round2step(ctx, msg, n)), msg, n+1));
       }
       constexpr context round3(const context& ctx, const uint32_t* msg, int n)
       {
-        return n == 0 ? round3step(ctx, msg, n) :
-          rotateCL(round3step(rotateCR(round3(ctx, msg, n-1), n), msg, n), n);
+        return n == 16 ? ctx :
+          rotateCL(round3(rotateCR(round3step(ctx, msg, n)), msg, n+1));
       }
       constexpr context round4(const context& ctx, const uint32_t* msg, int n)
       {
-        return n == 0 ? round4step(ctx, msg, n) :
-          rotateCL(round4step(rotateCR(round4(ctx, msg, n-1), n), msg, n), n);
+        return n == 16 ? ctx :
+          rotateCL(round4(rotateCR(round4step(ctx, msg, n)), msg, n+1));
       }
 
-      // the complete transform, for a message that is a multiple of 64 bytes
-      constexpr context md5transform(const context& ctx)
+      // the complete transform, for a schedule block
+      constexpr context md5transform(const context& ctx, const schedule& s)
       {
         return ctxadd(ctx,
                       round4(
                           round3(
                               round2(
-                                  round1(ctx, ctx.buf, 15),
-                                  ctx.buf, 15),
-                              ctx.buf, 15),
-                          ctx.buf, 15));
+                                  round1(ctx, s.w, 0),
+                                  s.w, 0),
+                              s.w, 0),
+                          s.w, 0));
       }
 
       // three conditions:
@@ -284,10 +285,10 @@ namespace cx
       {
         return
           len >= 64 ?
-          md5update(md5transform(init(ctx, msg)), msg+64, len-64, origlen) :
+          md5update(md5transform(ctx, init(msg)), msg+64, len-64, origlen) :
           len >= 56 ?
-          md5update(md5transform(leftover(ctx, msg, len, origlen, 100)), msg+len, -100, origlen) :
-          md5transform(leftover(ctx, msg, len, origlen, 56));
+          md5update(md5transform(ctx, leftover(msg, len, origlen, 100)), msg+len, -100, origlen) :
+          md5transform(ctx, leftover(msg, len, origlen, 56));
       }
       constexpr md5sum md5withlen(const char* msg, int len)
       {

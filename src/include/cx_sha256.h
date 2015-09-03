@@ -47,7 +47,7 @@ namespace cx
         uint32_t w[64];
       };
 
-      // sha256sum utility functions: add, convert to sum
+      // add two sha256sums
       constexpr sha256sum sumadd(const sha256sum& s1, const sha256sum& s2)
       {
         return { { s1.h[0] + s2.h[0], s1.h[1] + s2.h[1],
