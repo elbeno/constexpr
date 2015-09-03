@@ -52,6 +52,11 @@ namespace cx
         uint32_t f;
         uint32_t g;
         uint32_t h;
+      };
+
+      // a schedule is the chunk of buffer to work on, extended to 64 words
+      struct schedule
+      {
         uint32_t w[64];
       };
 
@@ -59,8 +64,7 @@ namespace cx
       constexpr context ctxadd(const context& c1, const context& c2)
       {
         return { c1.a + c2.a, c1.b + c2.b, c1.c + c2.c, c1.d + c2.d,
-            c1.e + c2.e, c1.f + c2.f, c1.g + c2.g, c1.h + c2.h,
-          {0} };
+            c1.e + c2.e, c1.f + c2.f, c1.g + c2.g, c1.h + c2.h };
       }
       constexpr sha256sum ctx2sum(const context& ctx)
       {
@@ -71,16 +75,15 @@ namespace cx
       constexpr context init()
       {
         return { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-            0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19, {0} };
+            0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 };
       }
-      // context from an existing context + buffer
-      constexpr context init(const context& ctx, const char* buf)
+      // schedule from an existing buffer
+      constexpr schedule init(const char* buf)
       {
-        return { ctx.a, ctx.b, ctx.c, ctx.d, ctx.e, ctx.f, ctx.g, ctx.h,
-          { word32be(buf), word32be(buf+4), word32be(buf+8), word32be(buf+12),
-            word32be(buf+16), word32be(buf+20), word32be(buf+24), word32be(buf+28),
-            word32be(buf+32), word32be(buf+36), word32be(buf+40), word32be(buf+44),
-            word32be(buf+48), word32be(buf+52), word32be(buf+56), word32be(buf+60) } };
+        return { { word32be(buf), word32be(buf+4), word32be(buf+8), word32be(buf+12),
+              word32be(buf+16), word32be(buf+20), word32be(buf+24), word32be(buf+28),
+              word32be(buf+32), word32be(buf+36), word32be(buf+40), word32be(buf+44),
+              word32be(buf+48), word32be(buf+52), word32be(buf+56), word32be(buf+60) } };
       }
 
       // computing leftovers is messy: we need to pad the empty space to a
@@ -102,41 +105,40 @@ namespace cx
           (static_cast<uint64_t>(origlen) >> 29) :
           0;
       }
-      constexpr context leftover(const context& ctx, const char* buf,
-                                 int len, int origlen, int origlenpos)
+      constexpr schedule leftover(const char* buf,
+                                  int len, int origlen, int origlenpos)
       {
-        return { ctx.a, ctx.b, ctx.c, ctx.d, ctx.e, ctx.f, ctx.g, ctx.h,
-          { word32be(buf, len) | pad(len) | origlenbytes(origlen, origlenpos),
-            word32be(len >= 4 ? buf+4 : buf, len-4)
-              | pad(len-4) | origlenbytes(origlen, origlenpos-4),
-            word32be(len >= 8 ? buf+8 : buf, len-8)
-              | pad(len-8) | origlenbytes(origlen, origlenpos-8),
-            word32be(len >= 12 ? buf+12 : buf, len-12)
-              | pad(len-12) | origlenbytes(origlen, origlenpos-12),
-            word32be(len >= 16 ? buf+16 : buf, len-16)
-              | pad(len-16) | origlenbytes(origlen, origlenpos-16),
-            word32be(len >= 20 ? buf+20 : buf, len-20)
-              | pad(len-20) | origlenbytes(origlen, origlenpos-20),
-            word32be(len >= 24 ? buf+24 : buf, len-24)
-              | pad(len-24) | origlenbytes(origlen, origlenpos-24),
-            word32be(len >= 28 ? buf+28 : buf, len-28)
-              | pad(len-28) | origlenbytes(origlen, origlenpos-28),
-            word32be(len >= 32 ? buf+32 : buf, len-32)
-              | pad(len-32) | origlenbytes(origlen, origlenpos-32),
-            word32be(len >= 36 ? buf+36 : buf, len-36)
-              | pad(len-36) | origlenbytes(origlen, origlenpos-36),
-            word32be(len >= 40 ? buf+40 : buf, len-40)
-              | pad(len-40) | origlenbytes(origlen, origlenpos-40),
-            word32be(len >= 44 ? buf+44 : buf, len-44)
-              | pad(len-44) | origlenbytes(origlen, origlenpos-44),
-            word32be(len >= 48 ? buf+48 : buf, len-48)
-              | pad(len-48) | origlenbytes(origlen, origlenpos-48),
-            word32be(len >= 52 ? buf+52 : buf, len-52)
-              | pad(len-52) | origlenbytes(origlen, origlenpos-52),
-            word32be(len >= 56 ? buf+56 : buf, len-56)
-              | pad(len-56) | origlenbytes(origlen, origlenpos-56),
-            word32be(len >= 60 ? buf+60 : buf, len-60)
-              | pad(len-60) | origlenbytes(origlen, origlenpos-60)} };
+        return { { word32be(buf, len) | pad(len) | origlenbytes(origlen, origlenpos),
+              word32be(len >= 4 ? buf+4 : buf, len-4)
+                | pad(len-4) | origlenbytes(origlen, origlenpos-4),
+              word32be(len >= 8 ? buf+8 : buf, len-8)
+                | pad(len-8) | origlenbytes(origlen, origlenpos-8),
+              word32be(len >= 12 ? buf+12 : buf, len-12)
+                | pad(len-12) | origlenbytes(origlen, origlenpos-12),
+              word32be(len >= 16 ? buf+16 : buf, len-16)
+                | pad(len-16) | origlenbytes(origlen, origlenpos-16),
+              word32be(len >= 20 ? buf+20 : buf, len-20)
+                | pad(len-20) | origlenbytes(origlen, origlenpos-20),
+              word32be(len >= 24 ? buf+24 : buf, len-24)
+                | pad(len-24) | origlenbytes(origlen, origlenpos-24),
+              word32be(len >= 28 ? buf+28 : buf, len-28)
+                | pad(len-28) | origlenbytes(origlen, origlenpos-28),
+              word32be(len >= 32 ? buf+32 : buf, len-32)
+                | pad(len-32) | origlenbytes(origlen, origlenpos-32),
+              word32be(len >= 36 ? buf+36 : buf, len-36)
+                | pad(len-36) | origlenbytes(origlen, origlenpos-36),
+              word32be(len >= 40 ? buf+40 : buf, len-40)
+                | pad(len-40) | origlenbytes(origlen, origlenpos-40),
+              word32be(len >= 44 ? buf+44 : buf, len-44)
+                | pad(len-44) | origlenbytes(origlen, origlenpos-44),
+              word32be(len >= 48 ? buf+48 : buf, len-48)
+                | pad(len-48) | origlenbytes(origlen, origlenpos-48),
+              word32be(len >= 52 ? buf+52 : buf, len-52)
+                | pad(len-52) | origlenbytes(origlen, origlenpos-52),
+              word32be(len >= 56 ? buf+56 : buf, len-56)
+                | pad(len-56) | origlenbytes(origlen, origlenpos-56),
+              word32be(len >= 60 ? buf+60 : buf, len-60)
+                | pad(len-60) | origlenbytes(origlen, origlenpos-60)} };
       }
 
       constexpr uint32_t rotateR(uint32_t x, int n)
@@ -159,71 +161,68 @@ namespace cx
           + s0(extendvalue(w, i-15, n)) + s1(extendvalue(w, i-2, n));
       }
 
-      // extend the 16 words in the context to the whole 64
+      // extend the 16 words in the schedule to the whole 64
       // to avoid hitting the max step limit, we'll do this by 16s
-      constexpr context sha256extend16(const context& ctx)
+      constexpr schedule sha256extend16(const schedule& s)
       {
-        return { ctx.a, ctx.b, ctx.c, ctx.d, ctx.e, ctx.f, ctx.g, ctx.h,
-          { ctx.w[0], ctx.w[1], ctx.w[2], ctx.w[3],
-              ctx.w[4], ctx.w[5], ctx.w[6], ctx.w[7],
-              ctx.w[8], ctx.w[9], ctx.w[10], ctx.w[11],
-              ctx.w[12], ctx.w[13], ctx.w[14], ctx.w[15],
-              extendvalue(ctx.w, 16, 16), extendvalue(ctx.w, 17, 16),
-              extendvalue(ctx.w, 18, 16), extendvalue(ctx.w, 19, 16),
-              extendvalue(ctx.w, 20, 16), extendvalue(ctx.w, 21, 16),
-              extendvalue(ctx.w, 22, 16), extendvalue(ctx.w, 23, 16),
-              extendvalue(ctx.w, 24, 16), extendvalue(ctx.w, 25, 16),
-              extendvalue(ctx.w, 26, 16), extendvalue(ctx.w, 27, 16),
-              extendvalue(ctx.w, 28, 16), extendvalue(ctx.w, 29, 16),
-              extendvalue(ctx.w, 30, 16), extendvalue(ctx.w, 31, 16) } };
+        return { { s.w[0], s.w[1], s.w[2], s.w[3],
+              s.w[4], s.w[5], s.w[6], s.w[7],
+              s.w[8], s.w[9], s.w[10], s.w[11],
+              s.w[12], s.w[13], s.w[14], s.w[15],
+              extendvalue(s.w, 16, 16), extendvalue(s.w, 17, 16),
+              extendvalue(s.w, 18, 16), extendvalue(s.w, 19, 16),
+              extendvalue(s.w, 20, 16), extendvalue(s.w, 21, 16),
+              extendvalue(s.w, 22, 16), extendvalue(s.w, 23, 16),
+              extendvalue(s.w, 24, 16), extendvalue(s.w, 25, 16),
+              extendvalue(s.w, 26, 16), extendvalue(s.w, 27, 16),
+              extendvalue(s.w, 28, 16), extendvalue(s.w, 29, 16),
+              extendvalue(s.w, 30, 16), extendvalue(s.w, 31, 16) } };
       }
-      constexpr context sha256extend32(const context& ctx)
+      constexpr schedule sha256extend32(const schedule& s)
       {
-        return { ctx.a, ctx.b, ctx.c, ctx.d, ctx.e, ctx.f, ctx.g, ctx.h,
-          { ctx.w[0], ctx.w[1], ctx.w[2], ctx.w[3],
-              ctx.w[4], ctx.w[5], ctx.w[6], ctx.w[7],
-              ctx.w[8], ctx.w[9], ctx.w[10], ctx.w[11],
-              ctx.w[12], ctx.w[13], ctx.w[14], ctx.w[15],
-              ctx.w[16], ctx.w[17], ctx.w[18], ctx.w[19],
-              ctx.w[20], ctx.w[21], ctx.w[22], ctx.w[23],
-              ctx.w[24], ctx.w[25], ctx.w[26], ctx.w[27],
-              ctx.w[28], ctx.w[29], ctx.w[30], ctx.w[31],
-              extendvalue(ctx.w, 32, 32), extendvalue(ctx.w, 33, 32),
-              extendvalue(ctx.w, 34, 32), extendvalue(ctx.w, 35, 32),
-              extendvalue(ctx.w, 36, 32), extendvalue(ctx.w, 37, 32),
-              extendvalue(ctx.w, 38, 32), extendvalue(ctx.w, 39, 32),
-              extendvalue(ctx.w, 40, 32), extendvalue(ctx.w, 41, 32),
-              extendvalue(ctx.w, 42, 32), extendvalue(ctx.w, 43, 32),
-              extendvalue(ctx.w, 44, 32), extendvalue(ctx.w, 45, 32),
-              extendvalue(ctx.w, 46, 32), extendvalue(ctx.w, 47, 32) } };
+        return { { s.w[0], s.w[1], s.w[2], s.w[3],
+              s.w[4], s.w[5], s.w[6], s.w[7],
+              s.w[8], s.w[9], s.w[10], s.w[11],
+              s.w[12], s.w[13], s.w[14], s.w[15],
+              s.w[16], s.w[17], s.w[18], s.w[19],
+              s.w[20], s.w[21], s.w[22], s.w[23],
+              s.w[24], s.w[25], s.w[26], s.w[27],
+              s.w[28], s.w[29], s.w[30], s.w[31],
+              extendvalue(s.w, 32, 32), extendvalue(s.w, 33, 32),
+              extendvalue(s.w, 34, 32), extendvalue(s.w, 35, 32),
+              extendvalue(s.w, 36, 32), extendvalue(s.w, 37, 32),
+              extendvalue(s.w, 38, 32), extendvalue(s.w, 39, 32),
+              extendvalue(s.w, 40, 32), extendvalue(s.w, 41, 32),
+              extendvalue(s.w, 42, 32), extendvalue(s.w, 43, 32),
+              extendvalue(s.w, 44, 32), extendvalue(s.w, 45, 32),
+              extendvalue(s.w, 46, 32), extendvalue(s.w, 47, 32) } };
       }
-      constexpr context sha256extend48(const context& ctx)
+      constexpr schedule sha256extend48(const schedule& s)
       {
-        return { ctx.a, ctx.b, ctx.c, ctx.d, ctx.e, ctx.f, ctx.g, ctx.h,
-          { ctx.w[0], ctx.w[1], ctx.w[2], ctx.w[3],
-              ctx.w[4], ctx.w[5], ctx.w[6], ctx.w[7],
-              ctx.w[8], ctx.w[9], ctx.w[10], ctx.w[11],
-              ctx.w[12], ctx.w[13], ctx.w[14], ctx.w[15],
-              ctx.w[16], ctx.w[17], ctx.w[18], ctx.w[19],
-              ctx.w[20], ctx.w[21], ctx.w[22], ctx.w[23],
-              ctx.w[24], ctx.w[25], ctx.w[26], ctx.w[27],
-              ctx.w[28], ctx.w[29], ctx.w[30], ctx.w[31],
-              ctx.w[32], ctx.w[33], ctx.w[34], ctx.w[35],
-              ctx.w[36], ctx.w[37], ctx.w[38], ctx.w[39],
-              ctx.w[40], ctx.w[41], ctx.w[42], ctx.w[43],
-              ctx.w[44], ctx.w[45], ctx.w[46], ctx.w[47],
-              extendvalue(ctx.w, 48, 48), extendvalue(ctx.w, 49, 48),
-              extendvalue(ctx.w, 50, 48), extendvalue(ctx.w, 51, 48),
-              extendvalue(ctx.w, 52, 48), extendvalue(ctx.w, 53, 48),
-              extendvalue(ctx.w, 54, 48), extendvalue(ctx.w, 55, 48),
-              extendvalue(ctx.w, 56, 48), extendvalue(ctx.w, 57, 48),
-              extendvalue(ctx.w, 58, 48), extendvalue(ctx.w, 59, 48),
-              extendvalue(ctx.w, 60, 48), extendvalue(ctx.w, 61, 48),
-              extendvalue(ctx.w, 62, 48), extendvalue(ctx.w, 63, 48) } };
+        return { { s.w[0], s.w[1], s.w[2], s.w[3],
+              s.w[4], s.w[5], s.w[6], s.w[7],
+              s.w[8], s.w[9], s.w[10], s.w[11],
+              s.w[12], s.w[13], s.w[14], s.w[15],
+              s.w[16], s.w[17], s.w[18], s.w[19],
+              s.w[20], s.w[21], s.w[22], s.w[23],
+              s.w[24], s.w[25], s.w[26], s.w[27],
+              s.w[28], s.w[29], s.w[30], s.w[31],
+              s.w[32], s.w[33], s.w[34], s.w[35],
+              s.w[36], s.w[37], s.w[38], s.w[39],
+              s.w[40], s.w[41], s.w[42], s.w[43],
+              s.w[44], s.w[45], s.w[46], s.w[47],
+              extendvalue(s.w, 48, 48), extendvalue(s.w, 49, 48),
+              extendvalue(s.w, 50, 48), extendvalue(s.w, 51, 48),
+              extendvalue(s.w, 52, 48), extendvalue(s.w, 53, 48),
+              extendvalue(s.w, 54, 48), extendvalue(s.w, 55, 48),
+              extendvalue(s.w, 56, 48), extendvalue(s.w, 57, 48),
+              extendvalue(s.w, 58, 48), extendvalue(s.w, 59, 48),
+              extendvalue(s.w, 60, 48), extendvalue(s.w, 61, 48),
+              extendvalue(s.w, 62, 48), extendvalue(s.w, 63, 48) } };
       }
-      constexpr context sha256extend(const context& ctx)
+      constexpr schedule sha256extend(const schedule& s)
       {
-        return sha256extend48(sha256extend32(sha256extend16(ctx)));
+        return sha256extend48(sha256extend32(sha256extend16(s)));
       }
 
       // the compression function, in 64 rounds
@@ -256,30 +255,30 @@ namespace cx
       // rotate contexts right and left (each round step does this)
       constexpr context rotateCR(const context& ctx)
       {
-        return { ctx.h, ctx.a, ctx.b, ctx.c, ctx.d, ctx.e, ctx.f, ctx.g, {0} };
+        return { ctx.h, ctx.a, ctx.b, ctx.c, ctx.d, ctx.e, ctx.f, ctx.g };
       }
       constexpr context rotateCL(const context& ctx)
       {
-        return { ctx.b, ctx.c, ctx.d, ctx.e, ctx.f, ctx.g, ctx.h, ctx.a, {0} };
+        return { ctx.b, ctx.c, ctx.d, ctx.e, ctx.f, ctx.g, ctx.h, ctx.a };
       }
 
       constexpr context sha256round(const context& ctx, uint32_t t1, uint32_t t2)
       {
-        return { ctx.a, ctx.b, ctx.c, ctx.d + t1, ctx.e, ctx.f, ctx.g, t1 + t2, {0} };
+        return { ctx.a, ctx.b, ctx.c, ctx.d + t1, ctx.e, ctx.f, ctx.g, t1 + t2 };
       }
-      constexpr context sha256compress(const context& ctx, const uint32_t* w, int step)
+      constexpr context sha256compress(const context& ctx, const schedule& s, int step)
       {
         return step == 64 ? ctx :
           rotateCL(
               sha256compress(
-                  rotateCR(sha256round(ctx, temp1(ctx, step) + w[step], temp2(ctx))),
-                  w, step + 1));
+                  rotateCR(sha256round(ctx, temp1(ctx, step) + s.w[step], temp2(ctx))),
+                  s, step + 1));
       }
 
       // the complete transform, for a message that is a multiple of 64 bytes
-      constexpr context sha256transform(const context& ctx)
+      constexpr context sha256transform(const context& ctx, const schedule& s)
       {
-        return ctxadd(sha256compress(ctx, sha256extend(ctx).w, 0), ctx);
+        return ctxadd(sha256compress(ctx, sha256extend(s), 0), ctx);
       }
 
       // three conditions:
@@ -292,11 +291,11 @@ namespace cx
       {
         return
           len >= 64 ?
-          sha256update(sha256transform(init(ctx, msg)), msg+64, len-64, origlen) :
+          sha256update(sha256transform(ctx, init(msg)), msg+64, len-64, origlen) :
           len >= 56 ?
           sha256update(sha256transform(
-                           leftover(ctx, msg, len, origlen, 100)), msg+len, -100, origlen) :
-          sha256transform(leftover(ctx, msg, len, origlen, 56));
+                           ctx, leftover(msg, len, origlen, 100)), msg+len, -100, origlen) :
+          sha256transform(ctx, leftover(msg, len, origlen, 56));
       }
       constexpr sha256sum sha256withlen(const char* msg, int len)
       {
