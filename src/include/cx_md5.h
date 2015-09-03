@@ -12,8 +12,7 @@ namespace cx
   // from least significant to most significant
   struct md5sum
   {
-    uint64_t low;
-    uint64_t high;
+    uint32_t h[4];
   };
 
   namespace detail
@@ -81,11 +80,7 @@ namespace cx
       }
       constexpr md5sum ctx2sum(const context& ctx)
       {
-        return
-        {
-          (static_cast<uint64_t>(ctx.b) << 32) | static_cast<uint64_t>(ctx.a),
-          (static_cast<uint64_t>(ctx.d) << 32) | static_cast<uint64_t>(ctx.c)
-        };
+        return { { ctx.a, ctx.b, ctx.c, ctx.d } };
       }
 
       // the basic MD5 operations

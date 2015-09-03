@@ -41,46 +41,64 @@ void test_cx_hash()
   };
 
   constexpr cx::md5sum md5sums[8] =  {
-    { 0xd41d8cd98f00b204, 0xe9800998ecf8427e },
-    { 0x0cc175b9c0f1b6a8, 0x31c399e269772661 },
-    { 0x900150983cd24fb0, 0xd6963f7d28e17f72 },
-    { 0xf96b697d7cb7938d, 0x525a2f31aaf161d0 },
-    { 0xc3fcd3d76192e400, 0x7dfb496cca67e13b },
-    { 0xd174ab98d277d9f5, 0xa5611c2c9f419d9f },
-    { 0x57edf4a22be3c955, 0xac49da2e2107b67a },
-    { 0xe4d7f1b4ed2e42d1, 0x5898f4b27b019da4 }
+    { { 0xd41d8cd9, 0x8f00b204, 0xe9800998, 0xecf8427e } },
+    { { 0x0cc175b9, 0xc0f1b6a8, 0x31c399e2, 0x69772661 } },
+    { { 0x90015098, 0x3cd24fb0, 0xd6963f7d, 0x28e17f72 } },
+    { { 0xf96b697d, 0x7cb7938d, 0x525a2f31, 0xaaf161d0 } },
+    { { 0xc3fcd3d7, 0x6192e400, 0x7dfb496c, 0xca67e13b } },
+    { { 0xd174ab98, 0xd277d9f5, 0xa5611c2c, 0x9f419d9f } },
+    { { 0x57edf4a2, 0x2be3c955, 0xac49da2e, 0x2107b67a } },
+    { { 0xe4d7f1b4, 0xed2e42d1, 0x5898f4b2, 0x7b019da4 } }
   };
 
-  static_assert(cx::endianswap(cx::md5(md5tests[0]).low)  == md5sums[0].low &&
-                cx::endianswap(cx::md5(md5tests[0]).high) == md5sums[0].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[0]).h[0]) == md5sums[0].h[0] &&
+                cx::endianswap(cx::md5(md5tests[0]).h[1]) == md5sums[0].h[1] &&
+                cx::endianswap(cx::md5(md5tests[0]).h[2]) == md5sums[0].h[2] &&
+                cx::endianswap(cx::md5(md5tests[0]).h[3]) == md5sums[0].h[3],
                 "md5(\"\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[1]).low)  == md5sums[1].low &&
-                cx::endianswap(cx::md5(md5tests[1]).high) == md5sums[1].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[1]).h[0]) == md5sums[1].h[0] &&
+                cx::endianswap(cx::md5(md5tests[1]).h[1]) == md5sums[1].h[1] &&
+                cx::endianswap(cx::md5(md5tests[1]).h[2]) == md5sums[1].h[2] &&
+                cx::endianswap(cx::md5(md5tests[1]).h[3]) == md5sums[1].h[3],
                 "md5(\"a\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[2]).low)  == md5sums[2].low &&
-                cx::endianswap(cx::md5(md5tests[2]).high) == md5sums[2].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[2]).h[0]) == md5sums[2].h[0] &&
+                cx::endianswap(cx::md5(md5tests[2]).h[1]) == md5sums[2].h[1] &&
+                cx::endianswap(cx::md5(md5tests[2]).h[2]) == md5sums[2].h[2] &&
+                cx::endianswap(cx::md5(md5tests[2]).h[3]) == md5sums[2].h[3],
                 "md5(\"abc\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[3]).low)  == md5sums[3].low &&
-                cx::endianswap(cx::md5(md5tests[3]).high) == md5sums[3].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[3]).h[0]) == md5sums[3].h[0] &&
+                cx::endianswap(cx::md5(md5tests[3]).h[1]) == md5sums[3].h[1] &&
+                cx::endianswap(cx::md5(md5tests[3]).h[2]) == md5sums[3].h[2] &&
+                cx::endianswap(cx::md5(md5tests[3]).h[3]) == md5sums[3].h[3],
                 "md5(\"message digest\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[4]).low)  == md5sums[4].low &&
-                cx::endianswap(cx::md5(md5tests[4]).high) == md5sums[4].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[4]).h[0]) == md5sums[4].h[0] &&
+                cx::endianswap(cx::md5(md5tests[4]).h[1]) == md5sums[4].h[1] &&
+                cx::endianswap(cx::md5(md5tests[4]).h[2]) == md5sums[4].h[2] &&
+                cx::endianswap(cx::md5(md5tests[4]).h[3]) == md5sums[4].h[3],
                 "md5(\"abcdefghijklmnopqrstuvwxyz\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[5]).low)  == md5sums[5].low &&
-                cx::endianswap(cx::md5(md5tests[5]).high) == md5sums[5].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[5]).h[0]) == md5sums[5].h[0] &&
+                cx::endianswap(cx::md5(md5tests[5]).h[1]) == md5sums[5].h[1] &&
+                cx::endianswap(cx::md5(md5tests[5]).h[2]) == md5sums[5].h[2] &&
+                cx::endianswap(cx::md5(md5tests[5]).h[3]) == md5sums[5].h[3],
                 "md5(\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[6]).low)  == md5sums[6].low &&
-                cx::endianswap(cx::md5(md5tests[6]).high) == md5sums[6].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[6]).h[0]) == md5sums[6].h[0] &&
+                cx::endianswap(cx::md5(md5tests[6]).h[1]) == md5sums[6].h[1] &&
+                cx::endianswap(cx::md5(md5tests[6]).h[2]) == md5sums[6].h[2] &&
+                cx::endianswap(cx::md5(md5tests[6]).h[3]) == md5sums[6].h[3],
                 "md5(\"12345678901234567890123456789012345678901234567890123456789012345678901234567890\")");
-  static_assert(cx::endianswap(cx::md5(md5tests[7]).low)  == md5sums[7].low &&
-                cx::endianswap(cx::md5(md5tests[7]).high) == md5sums[7].high,
+  static_assert(cx::endianswap(cx::md5(md5tests[7]).h[0]) == md5sums[7].h[0] &&
+                cx::endianswap(cx::md5(md5tests[7]).h[1]) == md5sums[7].h[1] &&
+                cx::endianswap(cx::md5(md5tests[7]).h[2]) == md5sums[7].h[2] &&
+                cx::endianswap(cx::md5(md5tests[7]).h[3]) == md5sums[7].h[3],
                 "md5(\"hello, world\")");
 
   constexpr auto silly = cx::md5(
 #include <helloworld>
   );
-  static_assert(cx::endianswap(silly.low)  == md5sums[7].low &&
-                cx::endianswap(silly.high) == md5sums[7].high,
+  static_assert(cx::endianswap(silly.h[0]) == md5sums[7].h[0] &&
+                cx::endianswap(silly.h[1]) == md5sums[7].h[1] &&
+                cx::endianswap(silly.h[2]) == md5sums[7].h[2] &&
+                cx::endianswap(silly.h[3]) == md5sums[7].h[3],
                 "md5(#include<helloworld>)");
 
   //----------------------------------------------------------------------------
