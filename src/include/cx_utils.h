@@ -91,5 +91,4 @@ namespace cx
     return ((x & 0xff) << 8)
       | ((x >> 8) & 0xff);
   }
-
 }

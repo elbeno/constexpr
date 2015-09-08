@@ -13,6 +13,8 @@ set(MY_CXX_FLAGS "-pedantic \
 -Wformat=2 \
 -Winit-self \
 -Wmissing-include-dirs \
+-Wno-undefined-inline \
+-Wno-undefined-internal \
 -Wold-style-cast \
 -Woverloaded-virtual \
 -Wredundant-decls \
@@ -35,7 +37,7 @@ if (USE_CLANG)
     SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
     SET (CMAKE_CXX_COMPILER "/usr/bin/clang++")
-    SET (CMAKE_CXX_FLAGS    "${MY_CXX_FLAGS} -std=c++14 -stdlib=libc++")
+    SET (CMAKE_CXX_FLAGS    "${MY_CXX_FLAGS} -std=c++11 -stdlib=libc++")
     SET (CMAKE_CXX_FLAGS_DEBUG          "-g")
     SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
     SET (CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG")
