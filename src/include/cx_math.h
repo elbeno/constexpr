@@ -1006,14 +1006,39 @@ namespace cx
     {
       return feq(y, log_iter(x, y)) ? y : log(x, log_iter(x, y));
     }
+    constexpr long double e()
+    {
+      return 2.71828182845904523536l;
+    }
+    // For numerical stability, constrain the domain to be x > 0.25 && x < 1024
+    // - multiply/divide as necessary. To achieve the desired recursion depth
+    // constraint, we need to account for the max double. So we'll divide by
+    // e^5. If you want to compute a compile-time log of huge or tiny long
+    // doubles, YMMV.
+
+    // if x <= 1, we will multiply by e^5 repeatedly until x > 1
+    template <typename T>
+    constexpr T logGT(T x)
+    {
+      return x > T{0.25} ? log(x, T{0}) :
+        logGT<T>(x * e() * e() * e() * e() * e()) - T{5};
+    }
+    // if x >= 2e10, we will divide by e^5 repeatedly until x < 2e10
+    template <typename T>
+    constexpr T logLT(T x)
+    {
+      return x < T{1024} ? log(x, T{0}) :
+        logLT<T>(x / (e() * e() * e() * e() * e())) + T{5};
+    }
   }
   template <typename FloatingPoint>
   constexpr FloatingPoint log(
       FloatingPoint x,
       typename std::enable_if<std::is_floating_point<FloatingPoint>::value>::type* = nullptr)
   {
-    return x > 0 ? detail::log(x, FloatingPoint{0}) :
-      throw detail::log_domain_error;
+    return x < 0 ? throw detail::log_domain_error :
+      x >= FloatingPoint{1024} ? detail::logLT(x) :
+      detail::logGT(x);
   }
   template <typename Integral>
   constexpr double log(

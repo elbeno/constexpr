@@ -291,6 +291,16 @@ void test_cx_math()
   static_assert(feq(0.6931471805599454, cx::log(2.0)), "log(2.0)");
   static_assert(feq(0.6931471805599453094l, cx::log(2.0l)), "log(2.0l)");
 
+  // these just exist to compile
+  constexpr auto log_max_float = cx::log(std::numeric_limits<float>::max());
+  static_assert(log_max_float > 0, "log_max_float");
+  constexpr auto log_min_float = cx::log(std::numeric_limits<float>::min());
+  static_assert(log_min_float < 0, "log_min_float");
+  constexpr auto log_max_double = cx::log(std::numeric_limits<double>::max());
+  static_assert(log_max_double > 0, "log_max_double");
+  constexpr auto log_min_double = cx::log(std::numeric_limits<double>::min());
+  static_assert(log_min_double < 0, "log_min_double");
+
   //----------------------------------------------------------------------------
   // log10
   static_assert(feq(1.0f, cx::log10(10.0f)), "log10(10.0f)");
@@ -303,6 +313,16 @@ void test_cx_math()
   static_assert(feq(0.3010299956639812, cx::log10(2.0)), "log10(2.0)");
   static_assert(feq(0.3010299956639811952l, cx::log10(2.0l)), "log10(2.0l)");
 
+  // these just exist to compile
+  constexpr auto log10_max_float = cx::log10(std::numeric_limits<float>::max());
+  static_assert(log10_max_float > 0, "log10_max_float");
+  constexpr auto log10_min_float = cx::log10(std::numeric_limits<float>::min());
+  static_assert(log10_min_float < 0, "log10_min_float");
+  constexpr auto log10_max_double = cx::log10(std::numeric_limits<double>::max());
+  static_assert(log10_max_double > 0, "log10_max_double");
+  constexpr auto log10_min_double = cx::log10(std::numeric_limits<double>::min());
+  static_assert(log10_min_double < 0, "log10_min_double");
+
   //----------------------------------------------------------------------------
   // log2
   static_assert(feq(1.0f, cx::log2(2.0f)), "log2(2.0f)");
@@ -314,6 +334,16 @@ void test_cx_math()
   static_assert(feq(3.3219278f, cx::log2(10.0f)), "log2(10.0f)");
   static_assert(feq(3.3219280948873604, cx::log2(10.0)), "log2(10.0)");
   static_assert(feq(3.321928094887362348l, cx::log2(10.0l)), "log2(10.0l)");
+
+  // these just exist to compile
+  constexpr auto log2_max_float = cx::log2(std::numeric_limits<float>::max());
+  static_assert(log2_max_float > 0, "log2_max_float");
+  constexpr auto log2_min_float = cx::log2(std::numeric_limits<float>::min());
+  static_assert(log2_min_float < 0, "log2_min_float");
+  constexpr auto log2_max_double = cx::log2(std::numeric_limits<double>::max());
+  static_assert(log2_max_double > 0, "log2_max_double");
+  constexpr auto log2_min_double = cx::log2(std::numeric_limits<double>::min());
+  static_assert(log2_min_double < 0, "log2_min_double");
 
   //----------------------------------------------------------------------------
   // sinh, cosh, tanh
