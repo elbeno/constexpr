@@ -10,3 +10,7 @@ abs, fabs, sqrt, cbrt, hypot, exp, sin, cos, tan, asin, acos, atan, atan2, floor
 ## String hashing
 
 fnv1, fnv1a, murmur3_32, md5, sha256
+
+## Utility functions
+
+strlen, endianswap, counter

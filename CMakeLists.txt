@@ -49,7 +49,7 @@ if (USE_CLANG)
     SET (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
     SET (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 else ()
-    SET (CMAKE_CXX_FLAGS    "${MY_CXX_FLAGS} -std=c++14")
+    SET (CMAKE_CXX_FLAGS    "${MY_CXX_FLAGS} -std=c++11")
 endif ()
 
 add_subdirectory (src/test)

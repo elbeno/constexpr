@@ -3,6 +3,10 @@
 // -----------------------------------------------------------------------------
 // A constexpr counter
 // see http://b.atch.se/posts/constexpr-counter/
+//
+// The basic idea is to use a "writer" class template instantiation to control
+// progressive instantiations of function overloads, that are then used as
+// SFINAE parameters to a "reader" function template.
 
 namespace cx
 {
@@ -10,50 +14,114 @@ namespace cx
   {
     namespace detail
     {
-      template <int N>
-      struct flag
+      // to limit recursive template depth, count low and high bits separately
+      // recursive template depth = MAX + 3
+      // min counter value = 0
+      // max counter value = 2^(2*BIT_DEPTH) - 1
+      constexpr int BIT_DEPTH = 6;          // max value = 4095
+      constexpr int MAX = (1 << BIT_DEPTH); // recursive template depth = 67
+      constexpr int BIT_MASK = MAX - 1;
+
+      // the low (flag1) and high(flag2) bits of the count
+      template <int H, int L>
+      struct flag1
       {
-        friend constexpr int adl_flag(flag<N>);
+        friend constexpr int adl_flag1(flag1<H, L>);
+      };
+      template <int H>
+      struct flag2
+      {
+        friend constexpr int adl_flag2(flag2<H>);
       };
 
-      template <int N>
-      struct writer
+      // readers for the flags: to read flag1 we need to wrap in a struct to
+      // provide the high bits argument (cannot partially specialize a function)
+      template <int H>
+      struct r1
       {
-        friend constexpr int adl_flag(flag<N>)
+        template <int L, int = adl_flag1(flag1<H, L>{})>
+        static constexpr int reader(int, flag1<H, L>)
         {
-          return N;
+          return L;
         }
-        static constexpr int value = N;
+        template <int L>
+        static constexpr int reader(
+            float, flag1<H, L>, int R = reader(H, flag1<H, L-1>{}))
+        {
+          return R;
+        }
+        static constexpr int reader(float, flag1<H, 0>)
+        {
+          return 0;
+        }
       };
 
-      template <int N, int = adl_flag(flag<N>{})>
-      int constexpr reader(int, flag<N>)
+      // to read flag2, just overload/specialize the function
+      template <int H, int = adl_flag2(flag2<H>{})>
+      constexpr int reader(int, flag2<H>)
       {
-        return N;
+        return H;
       }
-
-      template <int N>
-      int constexpr reader(
-          float, flag<N>, int R = reader(0, flag<N-1>{}))
+      template <int H>
+      constexpr int reader(
+          float, flag2<H>, int R = reader(0, flag2<H-1>{}))
       {
         return R;
       }
-
-      int constexpr reader(float, flag<0>)
+      constexpr int reader(float, flag2<0>)
       {
         return 0;
       }
 
-      // This implementation works by counting down; it's limited to ~250 by the
-      // default maximum template recursion depth.
-      constexpr int max_count = 250;
+      // write the low bits flag
+      template <int H, int L>
+      struct writelo
+      {
+        friend constexpr int adl_flag1(flag1<H, L>)
+        {
+          return L;
+        }
+        static constexpr int value = L;
+      };
+      // write the high bits flag (if it should be written)
+      template <int H, bool B>
+      struct writehi
+      {
+        friend constexpr int adl_flag2(flag2<H>)
+        {
+          return H;
+        }
+        static constexpr int value = H;
+      };
+      template <int H>
+      struct writehi<H, false>
+      {
+        static constexpr int value = H;
+      };
+
+      // write the complete value: write the high bits if the low bits are
+      // rolling over, and write the low bits (qualified with the high bits)
+      template <int H, int L>
+      struct writer
+      {
+        static constexpr int hi_value =
+          writehi<H+1, L == MAX>::value << BIT_DEPTH;
+        static constexpr int lo_value =
+          writelo<H, (L & BIT_MASK)>::value;
+        static constexpr int value = (H << BIT_DEPTH) + L;
+      };
     }
   }
 
-  template <int N = 1>
-  inline int constexpr counter(
-      int R = detail::writer<detail::reader(0, detail::flag<detail::max_count>{}) + N>::value)
+  // Driver function: read the high and low bits, and instantiate the writer
+  // template to write them. The template parameter N must be used to control
+  // the instantiation of writer.
+  template <int N = 1,
+            int H = detail::reader(0, detail::flag2<detail::MAX>{}),
+            int L = detail::r1<H>::reader(0, detail::flag1<H, detail::MAX>{})>
+  inline constexpr int counter(
+      int R = detail::writer<H, L + N>::value)
   {
-    return R-1;
+    return R - 1;
   }
 }
