@@ -19,7 +19,7 @@ namespace cx
   }
   namespace
   {
-    namespace detail
+    namespace detail_c
     {
 
       // to limit recursive template depth, count low and high bits separately
@@ -54,7 +54,7 @@ namespace cx
         }
         template <int L>
         static constexpr int reader(
-            float, flag1<H, L>, int R = reader(H, flag1<H, L-1>{}))
+            float, flag1<H, L>, int R = reader(0, flag1<H, L-1>{}))
         {
           return R;
         }
@@ -113,7 +113,7 @@ namespace cx
       struct writer
       {
         static constexpr int hi_value =
-          writehi<H+1, L == MAX>::value << BIT_DEPTH;
+          writehi<H+1, L == MAX>::value;
         static constexpr int lo_value =
           writelo<H, (L & BIT_MASK)>::value;
         static constexpr int value = (H << BIT_DEPTH) + L;
@@ -125,10 +125,10 @@ namespace cx
   // template to write them. The template parameter N must be used to control
   // the instantiation of writer.
   template <int N = 1,
-            int H = detail::reader(0, detail::flag2<detail::MAX>{}),
-            int L = detail::r1<H>::reader(0, detail::flag1<H, detail::MAX>{})>
+            int H = detail_c::reader(0, detail_c::flag2<detail_c::MAX>{}),
+            int L = detail_c::r1<H>::reader(0, detail_c::flag1<H, detail_c::MAX>{})>
   inline constexpr int counter(
-      int R = detail::writer<H, L + N>::value)
+      int R = detail_c::writer<H, L + N>::value)
   {
     return true ? R - 1 :
       throw err::counter_runtime_error;
