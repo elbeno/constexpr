@@ -14,3 +14,7 @@ fnv1, fnv1a, murmur3_32, md5, sha256
 ## Utility functions
 
 strlen, endianswap, counter
+
+## Random number generation
+
+pcg32 (with a macro that seeds differently per-compile)
