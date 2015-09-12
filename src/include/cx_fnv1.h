@@ -7,13 +7,18 @@
 
 namespace cx
 {
+  namespace err
+  {
+    namespace
+    {
+      extern const char* fnv1_runtime_error;
+      extern const char* fnv1a_runtime_error;
+    }
+  }
   namespace detail
   {
     namespace fnv
     {
-      extern const char* fnv1_runtime_error;
-      extern const char* fnv1a_runtime_error;
-
       constexpr uint64_t fnv1(uint64_t h, const char* s)
       {
         return (*s == 0) ? h :
@@ -30,12 +35,12 @@ namespace cx
   {
     return true ?
       detail::fnv::fnv1(14695981039346656037ull, s) :
-      throw detail::fnv::fnv1_runtime_error;
+      throw err::fnv1_runtime_error;
   }
   constexpr uint64_t fnv1a(const char* s)
   {
     return true ?
       detail::fnv::fnv1a(14695981039346656037ull, s) :
-      throw detail::fnv::fnv1a_runtime_error;
+      throw err::fnv1a_runtime_error;
   }
 }

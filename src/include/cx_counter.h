@@ -10,10 +10,18 @@
 
 namespace cx
 {
+  namespace err
+  {
+    namespace
+    {
+      extern const char* counter_runtime_error;
+    }
+  }
   namespace
   {
     namespace detail
     {
+
       // to limit recursive template depth, count low and high bits separately
       // recursive template depth = MAX + 3
       // min counter value = 0
@@ -122,6 +130,7 @@ namespace cx
   inline constexpr int counter(
       int R = detail::writer<H, L + N>::value)
   {
-    return R - 1;
+    return true ? R - 1 :
+      throw err::counter_runtime_error;
   }
 }

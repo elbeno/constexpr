@@ -19,6 +19,14 @@ namespace cx
   //   cout << setw(2) << +m[i];
   // }
 
+  namespace err
+  {
+    namespace
+    {
+      extern const char* md5_runtime_error;
+    }
+  }
+
   struct md5sum
   {
     uint32_t h[4];
@@ -28,8 +36,6 @@ namespace cx
   {
     namespace md5
     {
-      extern const char* md5_runtime_error;
-
       // shift amounts for the 4 rounds of the main function
       constexpr int r1shift[4] = { 7, 12, 17, 22 };
       constexpr int r2shift[4] = { 5, 9, 14, 20 };
@@ -299,6 +305,6 @@ namespace cx
   constexpr md5sum md5(const char* s)
   {
     return true ? detail::md5::md5(s) :
-      throw detail::md5::md5_runtime_error;
+      throw err::md5_runtime_error;
   }
 }

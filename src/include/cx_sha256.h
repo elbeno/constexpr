@@ -17,6 +17,14 @@ namespace cx
   //   cout << setw(2) << +m[i];
   // }
 
+  namespace err
+  {
+    namespace
+    {
+      extern const char* sha256_runtime_error;
+    }
+  }
+
   struct sha256sum
   {
     uint32_t h[8];
@@ -26,8 +34,6 @@ namespace cx
   {
     namespace sha256
     {
-      extern const char* sha256_runtime_error;
-
       // magic round constants (actually the fractional parts of
       // the cubes roots of the first 64 primes 2..311)
       constexpr uint32_t roundconst[64] =
@@ -316,6 +322,6 @@ namespace cx
   constexpr sha256sum sha256(const char* s)
   {
     return true ? detail::sha256::sha256tole(detail::sha256::sha256(s)) :
-      throw detail::sha256::sha256_runtime_error;
+      throw err::sha256_runtime_error;
   }
 }
