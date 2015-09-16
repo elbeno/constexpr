@@ -41,10 +41,10 @@ namespace cx
 
     // Decrypt and encrypt are really the same: just xor the RNG byte stream
     // with the characters. For convenience, decrypt returns a std::string.
-    template <uint64_t S, size_t N, size_t ...Is>
-    std::string decrypt(const char_array<N>& a, std::index_sequence<Is...>)
+    template <uint64_t S, size_t ...Is>
+    std::string decrypt(const char* s, std::index_sequence<Is...>)
     {
-      return std::string { encrypt_at<S>(a.data, Is)... };
+      return { encrypt_at<S>(s, Is)... };
     }
 
     // Encrypt is constexpr where decrypt is not, because encrypt occurs at
@@ -76,7 +76,7 @@ namespace cx
 
     operator std::string() const
     {
-      return detail::decrypt<S>(m_enc, std::make_index_sequence<N>());
+      return detail::decrypt<S>(m_enc.data, std::make_index_sequence<N>());
     }
 
   private:
