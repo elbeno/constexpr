@@ -39,7 +39,7 @@ namespace cx
         cx::pcg::pcg32<S>() >> 16,
         0x4000 | cx::pcg::pcg32<S>() >> 20,
         (uint64_t{8 + (cx::pcg::pcg32<S>() >> 30)} << 60)
-        | uint64_t{cx::pcg::pcg32<S>() & 0x0fffffff} << 28
+        | uint64_t{cx::pcg::pcg32<S>() & 0x0fffffff} << 32
         | uint64_t{cx::pcg::pcg32<S>()} } :
     throw err::guidgen_runtime_error;
   }
