@@ -1,7 +1,8 @@
 # Experiments with constexpr
 
 Everything (with the exception of a few of the long double functions in the math
-library) is written in C++11 constexpr style for maximum compatibility.
+library, and the string encryption, which uses std::make_index_sequence) is
+written in C++11 constexpr style for maximum compatibility.
 
 ## Math functions
 
@@ -22,4 +23,4 @@ guidgen (generate a random GUID)
 
 ## String encryption
 
-make_encrypted_string (with a macro that seeds the encryption)
+make_encrypted_string (with a macro that seeds the encryption appropriately)

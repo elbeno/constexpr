@@ -20,34 +20,40 @@ namespace cx
     }
   }
 
-  // encrypt a single character of a given string under a seed that is used to
-  // advance the rng to that position
-  template <uint64_t S>
-  constexpr char encrypt_at(const char* s, size_t idx)
+  namespace detail
   {
-    return s[idx] ^
-      static_cast<char>(pcg::pcg32_output(pcg::pcg32_advance(S, idx+1)) >> 24);
-  }
+    // encrypt/decrypt (it's symmetric, just XORing a random bytestream) a
+    // single character of a given string under a seed that is used to advance
+    // the rng to that position
+    template <uint64_t S>
+    constexpr char encrypt_at(const char* s, size_t idx)
+    {
+      return s[idx] ^
+        static_cast<char>(pcg::pcg32_output(pcg::pcg32_advance(S, idx+1)) >> 24);
+    }
 
-  // store the string in a char_array for constexpr manipulation
-  template <size_t N>
-  struct char_array
-  {
-    char data[N];
-  };
+    // store the string in a char_array for constexpr manipulation
+    template <size_t N>
+    struct char_array
+    {
+      char data[N];
+    };
 
-  // Decrypt and encrypt are really the same: just xor the RNG byte stream with
-  // the characters. For convenience, decrypt returns a std::string.
-  template <uint64_t S, size_t N, size_t ...Is>
-  std::string decrypt(const char_array<N>& a, std::index_sequence<Is...>)
-  {
-    return std::string { encrypt_at<S>(a.data, Is)... };
-  }
+    // Decrypt and encrypt are really the same: just xor the RNG byte stream
+    // with the characters. For convenience, decrypt returns a std::string.
+    template <uint64_t S, size_t N, size_t ...Is>
+    std::string decrypt(const char_array<N>& a, std::index_sequence<Is...>)
+    {
+      return std::string { encrypt_at<S>(a.data, Is)... };
+    }
 
-  template <uint64_t S, size_t ...Is>
-  constexpr char_array<sizeof...(Is)> encrypt(const char *s, std::index_sequence<Is...>)
-  {
-    return {{ encrypt_at<S>(s, Is)... }};
+    // Encrypt is constexpr where decrypt is not, because encrypt occurs at
+    // compile time
+    template <uint64_t S, size_t ...Is>
+    constexpr char_array<sizeof...(Is)> encrypt(const char *s, std::index_sequence<Is...>)
+    {
+      return {{ encrypt_at<S>(s, Is)... }};
+    }
   }
 
   // An encrypted string is just constructed by encrypting at compile time,
@@ -61,7 +67,7 @@ namespace cx
     using arr = const char(&)[N];
 
     constexpr encrypted_string(arr a)
-      : m_enc(encrypt<S>(a, std::make_index_sequence<N>()))
+      : m_enc(detail::encrypt<S>(a, std::make_index_sequence<N>()))
     {}
 
     constexpr uint64_t seed() const { return S; }
@@ -70,11 +76,11 @@ namespace cx
 
     operator std::string() const
     {
-      return decrypt<S>(m_enc, std::make_index_sequence<N>());
+      return detail::decrypt<S>(m_enc, std::make_index_sequence<N>());
     }
 
   private:
-    const char_array<N> m_enc;
+    const detail::char_array<N> m_enc;
   };
 
   // convenience function for inferring the string size and ensuring no
