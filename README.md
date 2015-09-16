@@ -18,3 +18,8 @@ strlen, endianswap, counter
 ## Random number generation
 
 pcg32 (with a macro that seeds differently per-compile)
+guidgen (generate a random GUID)
+
+## String encryption
+
+make_encrypted_string (with a macro that seeds the encryption)
