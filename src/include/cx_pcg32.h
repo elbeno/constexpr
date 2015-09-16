@@ -161,8 +161,8 @@ namespace cx
         throw err::pcg32_runtime_error;
     }
   }
-
-  // macro that seeds the rng differently every compile, and provides for
-  // per-line instantiations
-#define cx_pcg32 cx::pcg::pcg32<cx::fnv1(__FILE__ __DATE__ __TIME__) + __LINE__>
 }
+
+// macro that seeds the rng differently every compile, and provides for
+// per-line instantiations
+#define cx_pcg32 cx::pcg::pcg32<cx::fnv1(__FILE__ __DATE__ __TIME__) + __LINE__>
