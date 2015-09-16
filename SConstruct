@@ -11,6 +11,7 @@ env = Environment(BUILDTYPE = buildType,
 
 env.Append(CCFLAGS = "-g -std=c++14")
 env.Append(CCFLAGS = ["-pedantic"
+                      , "-ffunction-sections"
                       , "-Wall"
                       , "-Wextra"
                       , "-Wcast-align"
@@ -19,6 +20,8 @@ env.Append(CCFLAGS = ["-pedantic"
                       , "-Wdisabled-optimization"
                       , "-Wformat=2"
                       , "-Winit-self"
+                      , "-Wno-undefined-inline"
+                      , "-Wno-undefined-internal"
                       , "-Wmissing-include-dirs"
                       , "-Wold-style-cast"
                       , "-Woverloaded-virtual"

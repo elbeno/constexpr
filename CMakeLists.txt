@@ -4,6 +4,7 @@ include_directories ("${PROJECT_SOURCE_DIR}/src/include")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(MY_CXX_FLAGS "-pedantic \
+-ffunction-sections \
 -Wall \
 -Wextra \
 -Wcast-align \
@@ -37,7 +38,7 @@ if (USE_CLANG)
     SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
     SET (CMAKE_CXX_COMPILER "/usr/bin/clang++")
-    SET (CMAKE_CXX_FLAGS    "${MY_CXX_FLAGS} -std=c++11 -stdlib=libc++")
+    SET (CMAKE_CXX_FLAGS    "${MY_CXX_FLAGS} -std=c++14 -stdlib=libc++")
     SET (CMAKE_CXX_FLAGS_DEBUG          "-g")
     SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
     SET (CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG")
@@ -49,7 +50,7 @@ if (USE_CLANG)
     SET (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
     SET (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 else ()
-    SET (CMAKE_CXX_FLAGS    "${MY_CXX_FLAGS} -std=c++11")
+    SET (CMAKE_CXX_FLAGS    "${MY_CXX_FLAGS} -std=c++14")
 endif ()
 
 add_subdirectory (src/test)
