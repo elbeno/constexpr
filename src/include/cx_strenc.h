@@ -41,15 +41,16 @@ namespace cx
 
     // Decrypt and encrypt are really the same: just xor the RNG byte stream
     // with the characters. For convenience, decrypt returns a std::string.
-    template <size_t ...Is>
-    inline std::string decrypt(uint64_t S, const char* s, std::index_sequence<Is...>)
+    inline std::string decrypt(uint64_t S, const char* s, size_t n)
     {
-      auto f = [S]() mutable
+      std::string ret;
+      ret.reserve(n);
+      for (size_t i = 0; i < n; ++i)
       {
         S = pcg::pcg32_advance(S);
-        return static_cast<char>(pcg::pcg32_output(S) >> 24);
-      };
-      return { static_cast<char>(s[Is] ^ f())... };
+        ret.push_back(s[i] ^ static_cast<char>(pcg::pcg32_output(S) >> 24));
+      }
+      return ret;
     }
 
     // Encrypt is constexpr where decrypt is not, because encrypt occurs at
@@ -76,7 +77,7 @@ namespace cx
 
     operator std::string() const
     {
-      return detail::decrypt(S, m_enc.data, std::make_index_sequence<N-1>());
+      return detail::decrypt(S, m_enc.data, N-1);
     }
 
   private:
