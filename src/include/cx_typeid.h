@@ -26,7 +26,7 @@ namespace cx
     {
 #ifdef _MSC_VER
       // this is untested: __FUNCDNAME__ or __FUNCSIG__ ?
-      return __FUNCDNAME__
+      return __FUNCDNAME__;
 #else
       return __PRETTY_FUNCTION__;
 #endif
