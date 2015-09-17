@@ -41,10 +41,15 @@ namespace cx
 
     // Decrypt and encrypt are really the same: just xor the RNG byte stream
     // with the characters. For convenience, decrypt returns a std::string.
-    template <uint64_t S, size_t ...Is>
-    std::string decrypt(const char* s, std::index_sequence<Is...>)
+    template <size_t ...Is>
+    inline std::string decrypt(uint64_t S, const char* s, std::index_sequence<Is...>)
     {
-      return { encrypt_at<S>(s, Is)... };
+      auto f = [S]() mutable
+      {
+        S = pcg::pcg32_advance(S);
+        return static_cast<char>(pcg::pcg32_output(S) >> 24);
+      };
+      return { static_cast<char>(s[Is] ^ f())... };
     }
 
     // Encrypt is constexpr where decrypt is not, because encrypt occurs at
@@ -58,29 +63,24 @@ namespace cx
 
   // An encrypted string is just constructed by encrypting at compile time,
   // storing the encrypted array, and decrypting at runtime with a string
-  // conversion. Note that because N includes the null terminator, encrypted
-  // strings are not null-terminated.
+  // conversion. Note that the null terminator is not stored.
   template <uint64_t S, size_t N>
   class encrypted_string
   {
   public:
-    using arr = const char(&)[N];
-
-    constexpr encrypted_string(arr a)
-      : m_enc(detail::encrypt<S>(a, std::make_index_sequence<N>()))
+    constexpr encrypted_string(const char(&a)[N])
+      : m_enc(detail::encrypt<S>(a, std::make_index_sequence<N-1>()))
     {}
 
-    constexpr uint64_t seed() const { return S; }
-    constexpr arr get() const { return m_enc.data; }
-    constexpr size_t size() const { return N; }
+    constexpr size_t size() const { return N-1; }
 
     operator std::string() const
     {
-      return detail::decrypt<S>(m_enc.data, std::make_index_sequence<N>());
+      return detail::decrypt(S, m_enc.data, std::make_index_sequence<N-1>());
     }
 
   private:
-    const detail::char_array<N> m_enc;
+    const detail::char_array<N-1> m_enc;
   };
 
   // convenience function for inferring the string size and ensuring no
