@@ -32,22 +32,24 @@ All functions are within the cx namespace.
 * `strlen`
 * `strcmp`
 * `endianswap`
-* `counter`: returns monotonically increasing integers with each call within a given translation unit
+* `counter`: returns monotonically increasing integers with each call (within a given translation unit)
 
 ## Random number generation
 
 * `cx_pcg32`: a macro that returns a different random `uint32_t` with each call
-* `cx_guidgen`: a macro that generates a random GUID
+* `cx_guidgen`: a macro that generates a different random GUID with each call
 
 ## String encryption
 
-String encryption uses `std::make_index_sequence` therefore requires C++14
+String encryption uses `std::make_index_sequence` therefore requires C++14.
 
 * `cx_make_encrypted_string`: a macro that encrypts a string literal, with a runtime conversion to plaintext `std::string`
 
 ## Arrays
 
+Arrays use `std::make_index_sequence` therefore require C++14.
+
 * `array<type, size>`: a constexpr-friendly array type
-* `make_array`: create an array from e.g. a string literal
+* `make_array`: create an `array` from e.g. a string literal
 * `transform`: like `std::transform` but works on constexpr `array`s
 * `accumulate`: like `std::accumulate` but works on constexpr `array`s

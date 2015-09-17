@@ -122,14 +122,14 @@ namespace cx
 
   // transform: 1-arg (map) and 2-arg (zip) variants
   template <typename F, typename T, size_t N>
-  constexpr auto transform(F&& f, const array<T, N>& a) -> decltype(a.map(f))
+  constexpr auto transform(const array<T, N>& a, F&& f) -> decltype(a.map(f))
   {
     return true ? a.map(std::forward<F>(f)) :
       throw err::array_runtime_error;
   }
 
   template <typename F, typename T, size_t N, typename U, size_t M>
-  constexpr auto transform(F&& f, const array<T, N>& a, const array<U, M>& b)
+  constexpr auto transform(const array<T, N>& a, const array<U, M>& b, F&& f)
     -> decltype(a.map(f, b))
   {
     return true ? a.map(std::forward<F>(f), b) :
@@ -138,7 +138,7 @@ namespace cx
 
   // accumulate (fold)
   template <typename F, typename T, size_t N, typename U>
-  constexpr U accumulate(F&& f, const array<T, N>& a, U&& u)
+  constexpr U accumulate(const array<T, N>& a, U&& u, F&& f)
   {
     return true ? a.fold(std::forward<F>(f), std::forward<U>(u)) :
       throw err::array_runtime_error;
