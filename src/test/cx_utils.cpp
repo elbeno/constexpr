@@ -28,4 +28,8 @@ void test_cx_utils()
                            "01234567890123456789012345678901234567890123456789"
                            "01234567890123456789012345678901234567890123456789"
                            ) == 1000, "strlen(\"\")");
+
+  static_assert(cx::strcmp("abc", "abc") == 0, "strcmp equal");
+  static_assert(cx::strcmp("abc", "abd") == -1, "strcmp a < b");
+  static_assert(cx::strcmp("abc", "abb") == 1, "strcmp a > b");
 }

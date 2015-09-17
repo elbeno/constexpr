@@ -1,3 +1,4 @@
+extern void test_cx_array();
 extern void test_cx_counter();
 extern void test_cx_guid();
 extern void test_cx_hash();
@@ -8,6 +9,7 @@ extern void test_cx_utils();
 
 int main(int, char* [])
 {
+  test_cx_array();
   test_cx_counter();
   test_cx_guid();
   test_cx_hash();

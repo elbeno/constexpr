@@ -16,6 +16,7 @@ namespace cx
     namespace
     {
       extern const char* strlen_runtime_error;
+      extern const char* strcmp_runtime_error;
     }
   }
   namespace detail_s
@@ -47,6 +48,17 @@ namespace cx
     return true ?
       detail_s::strlen_bychunk(detail_s::strlen({s, 0}, 256), 256).len :
       throw err::strlen_runtime_error;
+  }
+
+  constexpr int strcmp(const char* a, const char* b)
+  {
+    return *a == 0 && *b == 0 ? 0 :
+      *a == 0 ? -1 :
+      *b == 0 ? 1 :
+      *a < *b ? -1 :
+      *a > *b ? 1 :
+      *a == *b ? strcmp(a+1, b+1) :
+      throw err::strcmp_runtime_error;
   }
 
   // convert char* buffer (fragment) to uint32_t (little-endian)
