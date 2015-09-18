@@ -51,7 +51,9 @@ namespace cx
     constexpr size_t size() const { return N; }
     constexpr const T operator[](size_t n) const { return m_data[n]; }
     constexpr const_iterator begin() const { return &m_data[0]; }
+    constexpr const_iterator cbegin() const { return &m_data[0]; }
     constexpr const_iterator end() const { return &m_data[N]; }
+    constexpr const_iterator cend() const { return &m_data[N]; }
 
     // map a function over an array (or two)
     template <typename F>
