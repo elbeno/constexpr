@@ -60,6 +60,10 @@ namespace cx
       *a == *b ? strcmp(a+1, b+1) :
       throw err::strcmp_runtime_error;
   }
+  constexpr int strless(const char* a, const char* b)
+  {
+    return strcmp(a, b) == -1;
+  }
 
   // convert char* buffer (fragment) to uint32_t (little-endian)
   constexpr uint32_t word32le(const char* s, int len)

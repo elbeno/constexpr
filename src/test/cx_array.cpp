@@ -1,4 +1,5 @@
 #include <cx_array.h>
+#include <cx_utils.h>
 
 constexpr char to_upper(char c)
 {
@@ -86,5 +87,19 @@ void test_cx_array()
     constexpr auto q = cx::sort(p, cless);
     static_assert(q[0] == 'a' && q[1] == 'b' &&
                   q[2] == 'c' && q[3] == 'd', "array sort");
+  }
+
+  {
+    constexpr auto r = cx::array<const char*, 4>{
+      "Mad Hatter",
+      "Alice",
+      "March Hare",
+      "Dormouse"
+    };
+    constexpr auto s = cx::sort(r, cx::strless);
+    static_assert(!cx::strcmp(s[0], "Alice") &&
+                  !cx::strcmp(s[1], "Dormouse") &&
+                  !cx::strcmp(s[2], "Mad Hatter") &&
+                  !cx::strcmp(s[3], "March Hare"), "tea party");
   }
 }
