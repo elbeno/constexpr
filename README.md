@@ -3,7 +3,7 @@
 Everything (with the exception of noted functions) is written in C++11 constexpr
 style for maximum compatibility.
 
-All functions are within the cx namespace.
+All functions are within the `cx` namespace.
 
 ## Math functions
 

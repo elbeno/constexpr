@@ -47,12 +47,13 @@ namespace cx
       : m_data { p[Is]... }
     {}
 
+    // size, element access, begin, end
     constexpr size_t size() const { return N; }
     constexpr const T operator[](size_t n) const { return m_data[n]; }
-
     constexpr const_iterator begin() const { return &m_data[0]; }
     constexpr const_iterator end() const { return &m_data[N]; }
 
+    // map a function over an array (or two)
     template <typename F>
     constexpr auto map(F&& f) const -> array<decltype(f(T{})), N>
     {
@@ -66,16 +67,89 @@ namespace cx
       return map(std::forward<F>(f), rhs, std::make_index_sequence<(N > M ? M : N)>());
     }
 
+    // fold a function over an array
     template <typename F, typename U>
     constexpr U fold(F&& f, U&& u) const
     {
       return fold(std::forward<F>(f), std::forward<U>(u), 0);
     }
 
+    // array comparison
     template <size_t M>
     constexpr bool less(const array<T, M>& rhs) const
     {
       return less_r(rhs.begin(), rhs.end(), 0);
+    }
+
+    // push_back, push_front
+    constexpr array<T, N+1> push_back(const T& t) const
+    {
+      return push_back(t, std::make_index_sequence<N>());
+    }
+
+    constexpr array<T, N+1> push_front(const T& t) const
+    {
+      return push_front(t, std::make_index_sequence<N>());
+    }
+
+    // concatenate two arrays
+    template <size_t M>
+    constexpr array<T, (M+N)> concat(const array<T, M>& a) const
+    {
+      return concat(a, std::make_index_sequence<N>(), std::make_index_sequence<M>());
+    }
+
+    // tail (omit first M elements) or init (omit last M elements)
+    template <size_t M = 1,
+              typename = typename std::enable_if<M < N>::type>
+    constexpr array<T, (N-M)> tail() const
+    {
+      return tail(std::make_index_sequence<(N-M)>());
+    }
+
+    template <size_t M = 1,
+              typename = typename std::enable_if<M < N>::type>
+    constexpr array<T, (N-M)> init() const
+    {
+      return init(std::make_index_sequence<(N-M)>());
+    }
+
+    // insert element at position
+    template <size_t I, typename = void>
+    struct inserter;
+
+    template <size_t I>
+    struct inserter<I, typename std::enable_if<(I == 0)>::type>
+    {
+      constexpr array<T, N+1> operator()(const array<T, N>& a, const T& t) const
+      {
+        return a.push_front(t, std::make_index_sequence<N>());
+      }
+    };
+
+    template <size_t I>
+    struct inserter<I, typename std::enable_if<(I > 0 && I < N)>::type>
+    {
+      constexpr array<T, N+1> operator()(const array<T, N>& a, const T& t) const
+      {
+        return a.init(std::make_index_sequence<I>()).concat(
+            a.tail(std::make_index_sequence<N-I>()).push_front(t));
+      }
+    };
+
+    template <size_t I>
+    struct inserter<I, typename std::enable_if<(I == N)>::type>
+    {
+      constexpr array<T, N+1> operator()(const array<T, N>& a, const T& t) const
+      {
+        return a.push_back(t, std::make_index_sequence<N>());
+      }
+    };
+
+    template <size_t I>
+    constexpr array<T, N+1> insert(const T& t) const
+    {
+      return inserter<I>()(*this, t);
     }
 
   private:
@@ -109,6 +183,38 @@ namespace cx
         i == N ? true : // this has run out
         m_data[i] < *b ? true : // elementwise less
         less_r(b+1, e, i+1); // recurse
+    }
+
+    template <size_t ...Is>
+    constexpr array<T, N+1> push_back(const T& t, std::index_sequence<Is...>) const
+    {
+      return { m_data[Is]..., t };
+    }
+
+    template <size_t ...Is>
+    constexpr array<T, N+1> push_front(const T& t, std::index_sequence<Is...>) const
+    {
+      return { t, m_data[Is]... };
+    }
+
+    template <size_t ...Is, size_t ...Js>
+    constexpr array<T, (sizeof...(Is) + sizeof...(Js))>
+    concat(const array<T, sizeof...(Js)>& a,
+           std::index_sequence<Is...>, std::index_sequence<Js...>) const
+    {
+      return { m_data[Is]..., a[Js]... };
+    }
+
+    template <size_t ...Is>
+    constexpr array<T, sizeof...(Is)> tail(std::index_sequence<Is...>) const
+    {
+      return { m_data[Is + N - sizeof...(Is)]... };
+    }
+
+    template <size_t ...Is>
+    constexpr array<T, sizeof...(Is)> init(std::index_sequence<Is...>) const
+    {
+      return { m_data[Is]... };
     }
   };
 
