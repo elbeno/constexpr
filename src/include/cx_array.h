@@ -80,6 +80,10 @@ namespace cx
     {
       return less_r(rhs.begin(), rhs.end(), 0);
     }
+    constexpr bool equals(const array<T, N>& rhs) const
+    {
+      return equals_r(rhs.begin(), 0);
+    }
 
     // push_back, push_front
     constexpr array<T, N+1> push_back(const T& t) const
@@ -119,37 +123,21 @@ namespace cx
     struct inserter;
 
     template <size_t I>
-    struct inserter<I, typename std::enable_if<(I == 0)>::type>
-    {
-      constexpr array<T, N+1> operator()(const array<T, N>& a, const T& t) const
-      {
-        return a.push_front(t, std::make_index_sequence<N>());
-      }
-    };
-
-    template <size_t I>
-    struct inserter<I, typename std::enable_if<(I > 0 && I < N)>::type>
-    {
-      constexpr array<T, N+1> operator()(const array<T, N>& a, const T& t) const
-      {
-        return a.init(std::make_index_sequence<I>()).concat(
-            a.tail(std::make_index_sequence<N-I>()).push_front(t));
-      }
-    };
-
-    template <size_t I>
-    struct inserter<I, typename std::enable_if<(I == N)>::type>
-    {
-      constexpr array<T, N+1> operator()(const array<T, N>& a, const T& t) const
-      {
-        return a.push_back(t, std::make_index_sequence<N>());
-      }
-    };
-
-    template <size_t I>
     constexpr array<T, N+1> insert(const T& t) const
     {
       return inserter<I>()(*this, t);
+    }
+
+    // mergesort
+    template <size_t I, typename = void>
+    struct sorter;
+    template <size_t I, size_t J, typename = void>
+    struct merger;
+
+    template <typename F>
+    constexpr array<T, N> mergesort(F&& f) const
+    {
+      return sorter<N>::sort(*this, std::forward<F>(f));
     }
 
   private:
@@ -184,6 +172,11 @@ namespace cx
         m_data[i] < *b ? true : // elementwise less
         less_r(b+1, e, i+1); // recurse
     }
+    constexpr bool equals_r(const T* b, size_t i) const
+    {
+      return i == N ? true :
+        m_data[i] == *b && equals_r(b+1, i+1);
+    }
 
     template <size_t ...Is>
     constexpr array<T, N+1> push_back(const T& t, std::index_sequence<Is...>) const
@@ -216,6 +209,119 @@ namespace cx
     {
       return { m_data[Is]... };
     }
+
+    // inserter for at front, in the middle somewhere, at end
+    template <size_t I>
+    struct inserter<I, typename std::enable_if<(I == 0)>::type>
+    {
+      constexpr array<T, N+1> operator()(const array<T, N>& a, const T& t) const
+      {
+        return a.push_front(t, std::make_index_sequence<N>());
+      }
+    };
+
+    template <size_t I>
+    struct inserter<I, typename std::enable_if<(I > 0 && I < N)>::type>
+    {
+      constexpr array<T, N+1> operator()(const array<T, N>& a, const T& t) const
+      {
+        return a.init(std::make_index_sequence<I>()).concat(
+            a.tail(std::make_index_sequence<N-I>()).push_front(t));
+      }
+    };
+
+    template <size_t I>
+    struct inserter<I, typename std::enable_if<(I == N)>::type>
+    {
+      constexpr array<T, N+1> operator()(const array<T, N>& a, const T& t) const
+      {
+        return a.push_back(t, std::make_index_sequence<N>());
+      }
+    };
+
+    // sorter: a 1-element array is sorted
+    template <size_t I>
+    struct sorter<I, typename std::enable_if<(I == 1)>::type>
+    {
+      template <typename F>
+      constexpr static array<T, I> sort(const array<T, I>& a, F&&)
+      {
+        return a;
+      }
+    };
+
+    // otherwise proceed by sorting each half and merging them
+    template <size_t I>
+    struct sorter<I, typename std::enable_if<(I > 1)>::type>
+    {
+      template <typename F>
+      constexpr static array<T, I> sort(const array<T, I>& a, const F& f)
+      {
+        return merger<I/2, I-I/2>::merge(
+            a.init(std::make_index_sequence<I/2>()).mergesort(f),
+            a.tail(std::make_index_sequence<I - I/2>()).mergesort(f),
+            f);
+      }
+    };
+
+    // merger: zero-length arrays aren't a thing, so allow for each or both to
+    // be of size 1
+    template <size_t I, size_t J>
+    struct merger<I, J,
+                  typename std::enable_if<(I == 1 && J == 1)>::type>
+    {
+      template <typename F>
+      constexpr static array<T, I+J> merge(const array<T, I>& a, const array<T, J>& b,
+                                           const F& f)
+      {
+        return f(b[0], a[0]) ?
+          a.push_front(b[0]) :
+          b.push_front(a[0]);
+      }
+    };
+
+    template <size_t I, size_t J>
+    struct merger<I, J,
+                  typename std::enable_if<(I == 1 && J > 1)>::type>
+    {
+      template <typename F>
+      constexpr static array<T, I+J> merge(const array<T, I>& a, const array<T, J>& b,
+                                           const F& f)
+      {
+        return f(b[0], a[0]) ?
+          merger<I, J-1>::merge(a, b.tail(), f).push_front(b[0]) :
+          b.push_front(a[0]);
+      }
+    };
+
+    template <size_t I, size_t J>
+    struct merger<I, J,
+                  typename std::enable_if<(I > 1 && J == 1)>::type>
+    {
+      template <typename F>
+      constexpr static array<T, I+J> merge(const array<T, I>& a, const array<T, J>& b,
+                                           const F& f)
+      {
+        return f(b[0], a[0]) ?
+          a.push_front(b[0]) :
+          merger<I-1, J>::merge(a.tail(), b, f).push_front(a[0]);
+      }
+    };
+
+    template <size_t I, size_t J>
+    struct merger<I, J,
+                  typename std::enable_if<(I > 1 && J > 1)>::type>
+    {
+      template <typename F>
+      constexpr static array<T, I+J> merge(const array<T, I>& a, const array<T, J>& b,
+                                           const F& f)
+      {
+        return f(b[0], a[0]) ?
+          merger<I, J-1>::merge(a, b.tail(), f).push_front(b[0]) :
+          merger<I-1, J>::merge(a.tail(), b, f).push_front(a[0]);
+      }
+    };
+
   };
 
   // make an array from e.g. a string literal
@@ -255,5 +361,23 @@ namespace cx
   {
     return true ? a.less(b) :
       throw err::array_runtime_error;
+  }
+
+  template <typename T, size_t N>
+  constexpr bool operator==(const array<T, N>& a, const array<T, N>& b)
+  {
+    return true ? a.equals(b) :
+      throw err::array_runtime_error;
+  }
+  template <typename T, size_t N>
+  constexpr bool operator!=(const array<T, N>& a, const array<T, N>& b)
+  {
+    return !(a == b);
+  }
+
+  template <typename F, typename T, size_t N>
+  constexpr array<T, N> sort(const array<T, N>& a, F&& lessFn)
+  {
+    return a.mergesort(std::forward<F>(lessFn));
   }
 }
