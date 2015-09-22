@@ -142,6 +142,12 @@ namespace cx
       return sorter<N>::sort(*this, std::forward<F>(f));
     }
 
+    // find
+    constexpr size_t find(const T& t) const
+    {
+      return find(t, 0);
+    }
+
   private:
     T m_data[N] = {};
 
@@ -324,6 +330,11 @@ namespace cx
       }
     };
 
+    constexpr size_t find(const T& t, size_t i) const
+    {
+      return i == N || t == m_data[i] ?  i :
+        find(t, i+1);
+    }
   };
 
   // make an array from e.g. a string literal
@@ -382,4 +393,5 @@ namespace cx
   {
     return a.mergesort(std::forward<F>(lessFn));
   }
+
 }
