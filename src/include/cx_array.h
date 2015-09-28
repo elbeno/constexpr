@@ -5,6 +5,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "cx_algorithm.h"
+
 //----------------------------------------------------------------------------
 // constexpr array
 
@@ -22,7 +24,7 @@ namespace cx
   class array
   {
   public:
-    using const_iterator = const T*;
+    using const_iterator = const T* const;
 
     // default constructor
     constexpr array() {}
@@ -82,10 +84,6 @@ namespace cx
     {
       return less_r(rhs.begin(), rhs.end(), 0);
     }
-    constexpr bool equals(const array<T, N>& rhs) const
-    {
-      return equals_r(rhs.begin(), 0);
-    }
 
     // push_back, push_front
     constexpr array<T, N+1> push_back(const T& t) const
@@ -142,12 +140,6 @@ namespace cx
       return sorter<N>::sort(*this, std::forward<F>(f));
     }
 
-    // find
-    constexpr size_t find(const T& t) const
-    {
-      return find(t, 0);
-    }
-
   private:
     T m_data[N] = {};
 
@@ -179,11 +171,6 @@ namespace cx
         i == N ? true : // this has run out
         m_data[i] < *b ? true : // elementwise less
         less_r(b+1, e, i+1); // recurse
-    }
-    constexpr bool equals_r(const T* b, size_t i) const
-    {
-      return i == N ? true :
-        m_data[i] == *b && equals_r(b+1, i+1);
     }
 
     template <size_t ...Is>
@@ -329,12 +316,6 @@ namespace cx
           merger<I-1, J>::merge(a.tail(), b, f).push_front(a[0]);
       }
     };
-
-    constexpr size_t find(const T& t, size_t i) const
-    {
-      return i == N || t == m_data[i] ?  i :
-        find(t, i+1);
-    }
   };
 
   // make an array from e.g. a string literal
@@ -343,6 +324,18 @@ namespace cx
   {
     return true ? array<T, N>(a) :
       throw err::array_runtime_error;
+  }
+
+  // array equality
+  template <typename T, size_t N>
+  constexpr bool operator==(const array<T, N>& a, const array<T, N>& b)
+  {
+    return equal(a.cbegin(), a.cend(), b.cbegin());
+  }
+  template <typename T, size_t N>
+  constexpr bool operator!=(const array<T, N>& a, const array<T, N>& b)
+  {
+    return !(a == b);
   }
 
   // transform: 1-arg (map) and 2-arg (zip) variants
@@ -374,18 +367,6 @@ namespace cx
   {
     return true ? a.less(b) :
       throw err::array_runtime_error;
-  }
-
-  template <typename T, size_t N>
-  constexpr bool operator==(const array<T, N>& a, const array<T, N>& b)
-  {
-    return true ? a.equals(b) :
-      throw err::array_runtime_error;
-  }
-  template <typename T, size_t N>
-  constexpr bool operator!=(const array<T, N>& a, const array<T, N>& b)
-  {
-    return !(a == b);
   }
 
   template <typename F, typename T, size_t N>

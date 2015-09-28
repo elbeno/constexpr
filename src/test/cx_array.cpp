@@ -102,10 +102,4 @@ void test_cx_array()
                   !cx::strcmp(s[2], "Mad Hatter") &&
                   !cx::strcmp(s[3], "March Hare"), "tea party");
   }
-
-  {
-    constexpr auto t = cx::make_array("hello");
-    constexpr auto u = t.find('l');
-    static_assert(u == 2, "array find");
-  }
 }
