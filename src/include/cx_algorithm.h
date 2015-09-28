@@ -181,10 +181,10 @@ namespace cx
   namespace detail
   {
     template <typename It, typename Pred, typename T = decltype(*std::declval<It>())>
-    constexpr bool find_if(It first, It last, T value, Pred p)
+    constexpr bool contains_match(It first, It last, T value, Pred p)
     {
       return first == last ? false :
-        p(*first, value) || find_if(first+1, last, value, p);
+        p(*first, value) || contains_match(first+1, last, value, p);
     }
   }
 
@@ -201,7 +201,7 @@ namespace cx
   constexpr It1 find_first_of(It1 first1, It1 last1,
                               It2 first2, It2 last2, Pred p)
   {
-    return first1 == last1 || detail::find_if(first2, last2, *first1, p) ? first1 :
+    return first1 == last1 || detail::contains_match(first2, last2, *first1, p) ? first1 :
       true ? find_first_of(first1+1, last1, first2, last2, p) :
       throw err::find_first_of_runtime_error;
   }
