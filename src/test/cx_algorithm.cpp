@@ -13,7 +13,7 @@ void test_cx_algorithm()
     {
       constexpr bool operator()(int a) { return a % 2 == 0; }
     };
-    constexpr auto a = cx::array<int, 5>{1,2,3,4,5};
+    constexpr auto a = cx::make_array(1,2,3,4,5);
 
     static_assert(cx::count(a.cbegin(), a.cend(), 4) == 1, "count");
     static_assert(cx::count_if(a.cbegin(), a.cend(), even{}) == 2, "count_if");
@@ -29,7 +29,7 @@ void test_cx_algorithm()
     {
       constexpr bool operator()(int a) { return a < 3; }
     };
-    constexpr auto a = cx::array<int, 5>{1,2,3,4,5};
+    constexpr auto a = cx::make_array(1,2,3,4,5);
 
     static_assert(*cx::find(a.cbegin(), a.cend(), 4) == 4, "find");
     static_assert(*cx::find_if(a.cbegin(), a.cend(), gt3{}) == 4, "find_if");
@@ -50,7 +50,7 @@ void test_cx_algorithm()
     {
       constexpr bool operator()(int a) { return a > 5; }
     };
-    constexpr auto a = cx::array<int, 5>{1,2,3,4,5};
+    constexpr auto a = cx::make_array(1,2,3,4,5);
 
     static_assert(cx::all_of(a.cbegin(), a.cend(), gt0{}), "all_of");
     static_assert(cx::any_of(a.cbegin(), a.cend(), even{}), "any_of");
@@ -59,8 +59,8 @@ void test_cx_algorithm()
 
   // equal
   {
-    constexpr auto a = cx::array<int, 5>{1,2,3,4,5};
-    constexpr auto b = cx::array<int, 5>{1,2,3,4,6};
+    constexpr auto a = cx::make_array(1,2,3,4,5);
+    constexpr auto b = cx::make_array(1,2,3,4,6);
 
     static_assert(cx::equal(a.cbegin(), a.cend(), a.cbegin()), "equal(1)");
     static_assert(!cx::equal(a.cbegin(), a.cend(), b.cbegin()), "equal(1)");
@@ -81,8 +81,8 @@ void test_cx_algorithm()
 
   // mismatch
   {
-    constexpr auto a = cx::array<int, 5>{1,2,3,4,5};
-    constexpr auto b = cx::array<int, 5>{1,2,3,4,6};
+    constexpr auto a = cx::make_array(1,2,3,4,5);
+    constexpr auto b = cx::make_array(1,2,3,4,6);
 
     static_assert(cx::mismatch(a.cbegin(), a.cend(),
                                a.cbegin()).first == a.end(),
@@ -115,8 +115,8 @@ void test_cx_algorithm()
 
   // find_first_of
   {
-    constexpr auto a = cx::array<int, 5>{1,2,3,4,5};
-    constexpr auto b = cx::array<int, 2>{3,4};
+    constexpr auto a = cx::make_array(1,2,3,4,5);
+    constexpr auto b = cx::make_array(3,4);
 
     static_assert(cx::find_first_of(a.cbegin(), a.cend(),
                                     b.cbegin(), b.cend()) == a.cbegin()+2,
@@ -128,8 +128,8 @@ void test_cx_algorithm()
 
   // adjacent_find
   {
-    constexpr auto a = cx::array<int, 5>{1,2,3,4,5};
-    constexpr auto b = cx::array<int, 5>{1,2,3,3,4};
+    constexpr auto a = cx::make_array(1,2,3,4,5);
+    constexpr auto b = cx::make_array(1,2,3,3,4);
     static_assert(cx::adjacent_find(a.cbegin(), a.cend()) == a.cend(),
                   "adjacent_find (1)");
     static_assert(cx::adjacent_find(b.cbegin(), b.cend()) == b.cbegin()+2,
@@ -142,9 +142,9 @@ void test_cx_algorithm()
 
   // search
   {
-    constexpr auto a = cx::array<int, 5>{1,2,3,4,5};
-    constexpr auto b = cx::array<int, 5>{1,3};
-    constexpr auto c = cx::array<int, 2>{3,4};
+    constexpr auto a = cx::make_array(1,2,3,4,5);
+    constexpr auto b = cx::make_array(1,3);
+    constexpr auto c = cx::make_array(3,4);
     static_assert(cx::search(a.cbegin(), a.cend(),
                              b.cbegin(), b.cend()) == a.cend(),
                   "search (1)");
@@ -161,7 +161,7 @@ void test_cx_algorithm()
 
   // search_n
   {
-    constexpr auto a = cx::array<int, 5>{1,2,3,3,4};
+    constexpr auto a = cx::make_array(1,2,3,3,4);
     static_assert(cx::search_n(a.cbegin(), a.cend(), 2, 3) == a.cbegin()+2,
                   "search_n (1)");
     static_assert(cx::search_n(a.cbegin(), a.cend(), 2, 4) == a.cend(),

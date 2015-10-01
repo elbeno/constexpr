@@ -280,5 +280,4 @@ namespace cx
     return true ? detail::search_np(first, last, count, value, p) :
       throw err::search_n_runtime_error;
   }
-
 }

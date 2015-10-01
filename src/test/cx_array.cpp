@@ -19,7 +19,7 @@ constexpr bool cless(char a, char b)
 
 void test_cx_array()
 {
-  constexpr auto test = cx::array<int, 5>{1,2,3,4,5};
+  constexpr auto test = cx::make_array(1,2,3,4,5);
 
   {
     constexpr auto a = cx::transform(cx::make_array("abcde"), to_upper);
@@ -32,10 +32,10 @@ void test_cx_array()
   }
 
   {
-    constexpr auto c = cx::array<int, 5>{1,2,3,4,6};
+    constexpr auto c = cx::make_array(1,2,3,4,6);
     static_assert(test < c, "array operator<");
 
-    constexpr auto d = cx::array<int, 5>{1,2,3,4,5};
+    constexpr auto d = cx::make_array(1,2,3,4,5);
     static_assert(test != c, "array operator!=");
     static_assert(test == d, "array operator==");
   }
@@ -49,7 +49,7 @@ void test_cx_array()
   }
 
   {
-    constexpr auto g = cx::array<int, 4>{6, 7, 8, 9};
+    constexpr auto g = cx::make_array(6,7,8,9);
     constexpr auto h = test.concat(g);
     static_assert(h[0] == 1 && h[8] == 9, "array concat");
   }
@@ -90,12 +90,8 @@ void test_cx_array()
   }
 
   {
-    constexpr auto r = cx::array<const char*, 4>{
-      "Mad Hatter",
-      "Alice",
-      "March Hare",
-      "Dormouse"
-    };
+    constexpr auto r = cx::make_array("Mad Hatter", "Alice",
+                                      "March Hare", "Dormouse");
     constexpr auto s = cx::sort(r, cx::strless);
     static_assert(!cx::strcmp(s[0], "Alice") &&
                   !cx::strcmp(s[1], "Dormouse") &&

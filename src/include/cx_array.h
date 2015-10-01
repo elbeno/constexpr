@@ -326,6 +326,18 @@ namespace cx
       throw err::array_runtime_error;
   }
 
+  // make an array from some values: decay them so that we can easily have
+  // arrays of string literals
+  template <typename E, typename ...Es>
+  constexpr auto make_array(E&& e, Es&&... es)
+    -> array<std::decay_t<E>, 1 + sizeof...(Es)>
+  {
+    return true ? array<std::decay_t<E>, 1+sizeof...(Es)>(
+        std::forward<std::decay_t<E>>(e),
+        std::forward<std::decay_t<Es>>(es)...) :
+      throw err::array_runtime_error;
+  }
+
   // array equality
   template <typename T, size_t N>
   constexpr bool operator==(const array<T, N>& a, const array<T, N>& b)
