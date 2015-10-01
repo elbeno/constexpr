@@ -98,4 +98,10 @@ void test_cx_array()
                   !cx::strcmp(s[2], "Mad Hatter") &&
                   !cx::strcmp(s[3], "March Hare"), "tea party");
   }
+
+  {
+    constexpr auto a = cx::make_array(5,4,3,2,1);
+    static_assert(a == cx::reverse(test), "array reverse");
+  }
+
 }

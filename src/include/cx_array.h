@@ -17,6 +17,10 @@ namespace cx
     namespace
     {
       extern const char* array_runtime_error;
+      extern const char* transform_runtime_error;
+      extern const char* accumulate_runtime_error;
+      extern const char* sort_runtime_error;
+      extern const char* reverse_runtime_error;
     }
   }
 
@@ -350,30 +354,7 @@ namespace cx
     return !(a == b);
   }
 
-  // transform: 1-arg (map) and 2-arg (zip) variants
-  template <typename F, typename T, size_t N>
-  constexpr auto transform(const array<T, N>& a, F&& f) -> decltype(a.map(f))
-  {
-    return true ? a.map(std::forward<F>(f)) :
-      throw err::array_runtime_error;
-  }
-
-  template <typename F, typename T, size_t N, typename U, size_t M>
-  constexpr auto transform(const array<T, N>& a, const array<U, M>& b, F&& f)
-    -> decltype(a.map(f, b))
-  {
-    return true ? a.map(std::forward<F>(f), b) :
-      throw err::array_runtime_error;
-  }
-
-  // accumulate (fold)
-  template <typename F, typename T, size_t N, typename U>
-  constexpr U accumulate(const array<T, N>& a, U&& u, F&& f)
-  {
-    return true ? a.fold(std::forward<F>(f), std::forward<U>(u)) :
-      throw err::array_runtime_error;
-  }
-
+  // array comparison
   template <typename T, size_t N, size_t M>
   constexpr bool operator<(const array<T, N>& a, const array<T, M>& b)
   {
@@ -381,10 +362,54 @@ namespace cx
       throw err::array_runtime_error;
   }
 
+  // transform: 1-arg (map) and 2-arg (zip) variants
+  template <typename F, typename T, size_t N>
+  constexpr auto transform(const array<T, N>& a, F&& f) -> decltype(a.map(f))
+  {
+    return true ? a.map(std::forward<F>(f)) :
+      throw err::transform_runtime_error;
+  }
+
+  template <typename F, typename T, size_t N, typename U, size_t M>
+  constexpr auto transform(const array<T, N>& a, const array<U, M>& b, F&& f)
+    -> decltype(a.map(f, b))
+  {
+    return true ? a.map(std::forward<F>(f), b) :
+      throw err::transform_runtime_error;
+  }
+
+  // accumulate (fold)
+  template <typename F, typename T, size_t N, typename U>
+  constexpr U accumulate(const array<T, N>& a, U&& u, F&& f)
+  {
+    return true ? a.fold(std::forward<F>(f), std::forward<U>(u)) :
+      throw err::accumulate_runtime_error;
+  }
+
+  // sort (mergesort)
   template <typename F, typename T, size_t N>
   constexpr array<T, N> sort(const array<T, N>& a, F&& lessFn)
   {
-    return a.mergesort(std::forward<F>(lessFn));
+    return true ? a.mergesort(std::forward<F>(lessFn)) :
+      throw err::sort_runtime_error;
+  }
+
+  // reverse
+  namespace detail
+  {
+    template <typename T, int ...Is>
+    constexpr array<T, sizeof...(Is)> reverse(
+        const array<T, sizeof...(Is)>& a, std::integer_sequence<int, Is...>)
+    {
+      return array<T, sizeof...(Is)>{a.end()[-(Is+1)]...};
+    }
+  }
+
+  template <typename T, size_t N>
+  constexpr array<T, N> reverse(const array<T, N>& a)
+  {
+    return true ? detail::reverse(a, std::make_integer_sequence<int, N>()) :
+      throw err::reverse_runtime_error;
   }
 
 }
