@@ -25,8 +25,6 @@ void test_cx_array()
     constexpr auto a = cx::transform(cx::make_array("abcde"), to_upper);
     static_assert(a[0] == 'A' && a[4] == 'E', "array map");
 
-    static_assert(cx::accumulate(test, 0, sum) == 15, "array fold");
-
     constexpr auto b = cx::transform(test, test, sum);
     static_assert(b[0] == 2 && b[4] == 10, "array 2-arg map");
   }

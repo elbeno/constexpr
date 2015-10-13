@@ -75,13 +75,6 @@ namespace cx
       return map(std::forward<F>(f), rhs, std::make_index_sequence<(N > M ? M : N)>());
     }
 
-    // fold a function over an array
-    template <typename F, typename U>
-    constexpr U fold(F&& f, U&& u) const
-    {
-      return fold(std::forward<F>(f), std::forward<U>(u), 0);
-    }
-
     // array comparison
     template <size_t M>
     constexpr bool less(const array<T, M>& rhs) const
@@ -160,13 +153,6 @@ namespace cx
     {
       return array<decltype(f(T{}, U{})), sizeof...(Is)>
         { f(m_data[Is], rhs.m_data[Is])... };
-    }
-
-    template <typename F, typename U>
-    constexpr U fold(F&& f, U&& u, size_t i) const
-    {
-      return i == N ? u :
-        fold(std::forward<F>(f), f(std::forward<U>(u), m_data[i]), i+1);
     }
 
     constexpr bool less_r(const T* b, const T* e, size_t i) const
@@ -378,14 +364,6 @@ namespace cx
       throw err::transform_runtime_error;
   }
 
-  // accumulate (fold)
-  template <typename F, typename T, size_t N, typename U>
-  constexpr U accumulate(const array<T, N>& a, U&& u, F&& f)
-  {
-    return true ? a.fold(std::forward<F>(f), std::forward<U>(u)) :
-      throw err::accumulate_runtime_error;
-  }
-
   // sort (mergesort)
   template <typename F, typename T, size_t N>
   constexpr array<T, N> sort(const array<T, N>& a, F&& lessFn)
@@ -411,5 +389,4 @@ namespace cx
     return true ? detail::reverse(a, std::make_integer_sequence<int, N>()) :
       throw err::reverse_runtime_error;
   }
-
 }

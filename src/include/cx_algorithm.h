@@ -69,7 +69,7 @@ namespace cx
       throw err::find_if_not_runtime_error;
   }
 
-  template< class It, class Pred >
+  template< class It, class Pred>
   constexpr bool all_of(It first, It last, Pred p)
   {
     return true ? find_if_not(first, last, p) == last :
