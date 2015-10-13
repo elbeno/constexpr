@@ -100,19 +100,27 @@ namespace cx
       return concat(a, std::make_index_sequence<N>(), std::make_index_sequence<M>());
     }
 
+    template <size_t A, size_t B,
+              typename = typename std::enable_if<(A < B)>::type,
+              typename = typename std::enable_if<(B <= N)>::type>
+    constexpr array<T, (B-A)> slice() const
+    {
+      return { &m_data[A], std::make_index_sequence<(B-A)>() };
+    }
+
     // tail (omit first M elements) or init (omit last M elements)
     template <size_t M = 1,
-              typename = typename std::enable_if<M < N>::type>
+              typename = typename std::enable_if<(M < N)>::type>
     constexpr array<T, (N-M)> tail() const
     {
-      return tail(std::make_index_sequence<(N-M)>());
+      return slice<M, N>();
     }
 
     template <size_t M = 1,
-              typename = typename std::enable_if<M < N>::type>
+              typename = typename std::enable_if<(M < N)>::type>
     constexpr array<T, (N-M)> init() const
     {
-      return init(std::make_index_sequence<(N-M)>());
+      return slice<0, N-M>();
     }
 
     // insert element at position
@@ -210,8 +218,7 @@ namespace cx
     {
       constexpr array<T, N+1> operator()(const array<T, N>& a, const T& t) const
       {
-        return a.init(std::make_index_sequence<I>()).concat(
-            a.tail(std::make_index_sequence<N-I>()).push_front(t));
+        return a.slice<0, I>().concat(a.slice<I, N>().push_front(t));
       }
     };
 
