@@ -13,6 +13,7 @@ namespace cx
     namespace
     {
       extern const char* accumulate_runtime_error;
+      extern const char* inner_product_runtime_error;
     }
   }
 
@@ -33,5 +34,29 @@ namespace cx
       first == last ? init :
       accumulate(first + 1, last, op(init, *first), op) :
       throw err::accumulate_runtime_error;
+  }
+
+  // inner_product
+  template <typename It1, typename It2, typename T>
+  constexpr T inner_product(It1 first1, It1 last1, It2 first2, T value)
+  {
+    return true ?
+      first1 == last1 ? value :
+      inner_product(first1 + 1, last1, first2 + 1,
+                    value + *first1 * *first2) :
+      throw err::inner_product_runtime_error;
+  }
+
+  template <typename It1, typename It2, typename T,
+            typename BinaryOp1, typename BinaryOp2>
+  constexpr T inner_product(It1 first1, It1 last1, It2 first2, T value,
+                            BinaryOp1 op1, BinaryOp2 op2)
+  {
+    return true ?
+      first1 == last1 ? value :
+      inner_product(first1 + 1, last1, first2 + 1,
+                    op1(value, op2(*first1, *first2)),
+                    op1, op2) :
+      throw err::inner_product_runtime_error;
   }
 }
