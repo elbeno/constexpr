@@ -17,6 +17,11 @@ constexpr bool cless(char a, char b)
   return a != 0 && a < b;
 }
 
+constexpr bool even(int i)
+{
+  return i % 2 == 0;
+}
+
 void test_cx_array()
 {
   constexpr auto test = cx::make_array(1,2,3,4,5);
@@ -100,6 +105,19 @@ void test_cx_array()
   {
     constexpr auto a = cx::make_array(5,4,3,2,1);
     static_assert(a == cx::reverse(test), "array reverse");
+  }
+
+  {
+    constexpr auto a = cx::make_array(2,4,1,3,5);
+    static_assert(a == cx::partition(test, even), "array partition");
+  }
+
+  {
+    // remove_if can be done something like this...
+    constexpr size_t C = cx::count_if(test.cbegin(), test.cend(), even);
+    constexpr auto r = cx::partition(test, even).slice<0, C>();
+    constexpr auto a = cx::make_array(2,4);
+    static_assert(a == r, "array remove_if");
   }
 
 }

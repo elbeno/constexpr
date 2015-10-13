@@ -18,8 +18,8 @@ namespace cx
     {
       extern const char* array_runtime_error;
       extern const char* transform_runtime_error;
-      extern const char* accumulate_runtime_error;
       extern const char* sort_runtime_error;
+      extern const char* partition_runtime_error;
       extern const char* reverse_runtime_error;
     }
   }
@@ -145,6 +145,12 @@ namespace cx
       return sorter<N>::sort(*this, std::forward<F>(f));
     }
 
+    template <typename P>
+    constexpr array<T, N> partition(P&& p) const
+    {
+      return mergesort(pred_to_less_t<P>(p));
+    }
+
   private:
     T m_data[N] = {};
 
@@ -267,8 +273,8 @@ namespace cx
                                            const F& f)
       {
         return f(b[0], a[0]) ?
-          a.push_front(b[0]) :
-          b.push_front(a[0]);
+          array<T, I+J>{ b[0], a[0] } :
+          array<T, I+J>{ a[0], b[0] };
       }
     };
 
@@ -312,6 +318,19 @@ namespace cx
           merger<I, J-1>::merge(a, b.tail(), f).push_front(b[0]) :
           merger<I-1, J>::merge(a.tail(), b, f).push_front(a[0]);
       }
+    };
+
+    // make a predicate into a comparison function suitable for sort
+    template <typename P>
+    struct pred_to_less_t
+    {
+      constexpr pred_to_less_t(P&& p) : m_p(std::forward<P>(p)) {}
+      constexpr bool operator()(const T& a, const T& b) const
+      {
+        return m_p(b) ? false : m_p(a);
+      }
+
+      P m_p;
     };
   };
 
@@ -377,6 +396,14 @@ namespace cx
   {
     return true ? a.mergesort(std::forward<F>(lessFn)) :
       throw err::sort_runtime_error;
+  }
+
+  // partition
+  template <typename P, typename T, size_t N>
+  constexpr array<T, N> partition(const array<T, N>& a, P&& pred)
+  {
+    return true ? a.partition(std::forward<P>(pred)) :
+      throw err::partition_runtime_error;
   }
 
   // reverse

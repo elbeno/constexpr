@@ -1,10 +1,6 @@
 #include <cx_array.h>
 #include <cx_numeric.h>
 
-#include <iostream>
-
-using namespace std;
-
 void test_cx_numeric()
 {
   // accumulate

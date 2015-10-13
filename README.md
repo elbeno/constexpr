@@ -52,4 +52,21 @@ Arrays use `std::make_index_sequence` therefore require C++14.
 * `array<type, size>`: a constexpr-friendly array type
 * `make_array`: create an `array` from e.g. a string literal
 * `transform`: like `std::transform` but works on constexpr `array`s
+* `reverse`
+* `sort`: an implementation of mergesort (stable)
+* `partition`: a stable partition (but use `count_if` to obtain the partition point)
+
+## Algorithms (including Numeric Algorithms)
+
 * `accumulate`: like `std::accumulate` but works on constexpr `array`s
+
+Similarly:
+
+* `all_of`, `any_of`, `none_of`
+* `count`, `count_if`
+* `find`, `find_if`, find_if_not`
+* `equal`, `mismatch`
+* `find_first_of`
+* `adjacent_find`
+* `search`, `search_n`
+* `inner_product`
