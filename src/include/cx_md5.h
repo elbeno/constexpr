@@ -289,7 +289,7 @@ namespace cx
           len >= 64 ?
           md5update(md5transform(sum, init(msg)), msg+64, len-64, origlen) :
           len >= 56 ?
-          md5update(md5transform(sum, leftover(msg, len, origlen, 100)), msg+len, -100, origlen) :
+          md5update(md5transform(sum, leftover(msg, len, origlen, 64)), msg+len, -1, origlen) :
           md5transform(sum, leftover(msg, len, origlen, 56));
       }
       constexpr md5sum md5withlen(const char* msg, int len)

@@ -296,7 +296,7 @@ namespace cx
           sha256update(sha256transform(sum, init(msg)), msg+64, len-64, origlen) :
           len >= 56 ?
           sha256update(sha256transform(
-                           sum, leftover(msg, len, origlen, 100)), msg+len, -100, origlen) :
+                           sum, leftover(msg, len, origlen, 64)), msg+len, -1, origlen) :
           sha256transform(sum, leftover(msg, len, origlen, 56));
       }
       constexpr sha256sum sha256withlen(const char* msg, int len)
