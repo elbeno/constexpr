@@ -5,6 +5,8 @@ style for maximum compatibility.
 
 All functions are within the `cx` namespace.
 
+This code is distributed under the MIT license. See LICENSE for details.
+
 ## Math functions
 
 * `abs`, `fabs`
