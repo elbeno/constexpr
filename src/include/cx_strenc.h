@@ -16,7 +16,7 @@ namespace cx
   {
     namespace
     {
-      extern const char* strenc_runtime_error;
+      const char* strenc_runtime_error;
     }
   }
 
@@ -97,3 +97,9 @@ namespace cx
 // a macro will allow appropriate seeding
 #define CX_ENCSTR_RNGSEED uint64_t{cx::fnv1(__FILE__ __DATE__ __TIME__) + __LINE__}
 #define cx_make_encrypted_string cx::make_encrypted_string<CX_ENCSTR_RNGSEED>
+
+// macros for fast usage
+#define strenc(str) std::string(cx_make_encrypted_string(str))
+#define cstrenc(str) strenc(str).c_str()
+#define wstrenc(str) std::wstring(strenc(str).begin(), strenc(str).end())
+#define wcstrenc(str) wstrenc(str).c_str()
